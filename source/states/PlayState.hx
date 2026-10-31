@@ -2157,6 +2157,9 @@ class PlayState extends MusicBeatState {
 
 		updateDirectionCamera();
 
+		if (scoreTextDirty)
+			writeScoreText();
+
 		// RESET = Quick Game Over Screen
 		if ((Options.getData("resetButton") && !switchedStates && controls.RESET) || (Options.getData("noHit") && misses > 0))
 			health = minHealth;
@@ -2809,7 +2812,8 @@ class PlayState extends MusicBeatState {
 
 		noteDiff ??= setNoteDiff;
 
-		replay.recordKeyHit(strumtime, noteDiff);
+		if (!Options.getData("botplay"))
+			replay.recordKeyHit(strumtime, noteDiff);
 
 		if (vocals != null)
 			vocals.volume = 1;
@@ -2879,7 +2883,14 @@ class PlayState extends MusicBeatState {
 			return;
 
 		rating.alpha = 1;
-		rating.loadGraphic(uiMap.get(daRating), false, 0, 0, true, daRating);
+		// the same picture again doesn't have to be loaded again (a lot of hits in a row are the same rating)
+		if (lastRatingName != daRating || rating.graphic == null) {
+			rating.loadGraphic(uiMap.get(daRating), false, 0, 0, true, daRating);
+			lastRatingName = daRating;
+		}
+		// loading the picture used to give the sprite its original size back, so it's done here too
+		rating.scale.set(1, 1);
+		rating.updateHitbox();
 
 		rating.screenCenter();
 		var initRatingX:Float = rating.x -= (Options.getData("middlescroll") ? 350 : (Options.getData("playAs") == 0 ? 0 : -150));
@@ -2909,7 +2920,7 @@ class PlayState extends MusicBeatState {
 
 		ratingsGroup.add(rating);
 
-		rating.setGraphicSize(rating.width * Std.parseFloat(ui_settings[0]) * Std.parseFloat(ui_settings[4]));
+		rating.setGraphicSize(rating.frameWidth * Std.parseFloat(ui_settings[0]) * Std.parseFloat(ui_settings[4]));
 		rating.antialiasing = ui_settings[3] == "true" && Options.getData("antialiasing");
 		rating.updateHitbox();
 
@@ -2928,7 +2939,12 @@ class PlayState extends MusicBeatState {
 			var numScore = numbers[daLoop];
 			numScore.alpha = 1;
 
-			numScore.loadGraphic(uiMap.get(Std.string(i)), false, 0, 0, true, Std.string(i));
+			if (lastNumberNames[daLoop] != Std.string(i) || numScore.graphic == null) {
+				numScore.loadGraphic(uiMap.get(Std.string(i)), false, 0, 0, true, Std.string(i));
+				lastNumberNames[daLoop] = Std.string(i);
+			}
+			numScore.scale.set(1, 1);
+			numScore.updateHitbox();
 
 			numScore.screenCenter();
 			numScore.x -= (Options.getData("middlescroll") ? 350 : (characterPlayingAs == BF ? 0 : -150));
@@ -2938,7 +2954,7 @@ class PlayState extends MusicBeatState {
 			numScore.x += Options.getData("comboOffset")[0];
 			numScore.y += Options.getData("comboOffset")[1];
 
-			numScore.setGraphicSize(numScore.width * Std.parseFloat(ui_settings[1]));
+			numScore.setGraphicSize(numScore.frameWidth * Std.parseFloat(ui_settings[1]));
 			numScore.updateHitbox();
 
 			numScore.antialiasing = ui_settings[3] == "true" && Options.getData("antialiasing");
@@ -2996,7 +3012,20 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
+	var scoreTextDirty:Bool = false;
+	var lastRatingName:String = null;
+	var lastNumberNames:Array<String> = [];
+
+	/**
+	 * The score text is only asked to change here, and written once per frame (a note hit changed it two or three times in a row,
+	 * and every change draws the text again - botplay hits a lot of notes in a short time).
+	 */
 	function updateScoreText() {
+		scoreTextDirty = true;
+	}
+
+	function writeScoreText() {
+		scoreTextDirty = false;
 		scoreTxt.text = '<  ${Options.getData('showScore') ? 'Score:${songScore} ~ ' : ''}Misses:${misses} ~ Accuracy:${accuracy}% ~ ${ratingStr}  >';
 		scoreTxt.screenCenter(X);
 	}
