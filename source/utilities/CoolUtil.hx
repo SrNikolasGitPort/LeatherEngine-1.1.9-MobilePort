@@ -487,11 +487,16 @@ class CoolUtil {
 		Paths.graphics.clear();
 
 		// Run built-in garbage collector
+		#if mobile
+		// compacting the whole heap on every state switch is slow on phones, a normal major collection is enough
+		cpp.vm.Gc.run(true);
+		#else
 		#if cpp
 		cpp.vm.Gc.compact();
 		#end
 		#if sys
 		openfl.system.System.gc();
+		#end
 		#end
 	}
 

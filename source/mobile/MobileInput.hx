@@ -434,6 +434,8 @@ class MobileInput extends Sprite {
 	var hitboxOpacity:Float = 0.2;
 	var hitboxOnGame:Bool = false;
 	var hideHint:Bool = false;
+	var hidePause:Bool = false;
+	var devButton:Bool = false;
 	var vSliceStyle:Bool = false;
 
 	/**
@@ -476,8 +478,11 @@ class MobileInput extends Sprite {
 	 */
 	public static function hideUntilNextState():Void {
 		hideFlag = true;
-		if (instance != null)
+		if (instance != null) {
 			instance.releaseEverything();
+			// swap to the empty layout right now, the load below freezes the last drawn frame
+			instance.updateLayout();
+		}
 	}
 
 	public static function initialize():Void {
@@ -503,7 +508,11 @@ class MobileInput extends Sprite {
 		lime.app.Application.current.window.onKeyDown.add(instance.onSystemKeyDown);
 		lime.app.Application.current.window.onKeyUp.add(instance.onSystemKeyUp);
 
-		FlxG.signals.postStateSwitch.add(() -> hideFlag = false);
+		FlxG.signals.postStateSwitch.add(() -> {
+			hideFlag = false;
+			if (instance != null)
+				instance.layoutKey = "";
+		});
 	}
 
 	function new() {
@@ -636,7 +645,7 @@ class MobileInput extends Sprite {
 		if (newMode == GAME) {
 			laneKeys = getLaneKeys();
 			useZones = vSliceStyle && laneKeys.length == 4;
-			newKey += ':${laneKeys.join(",")}:$hitboxVisible:$hitboxOpacity:$areaX:$areaWidth:$hideHint:$vSliceStyle';
+			newKey += ':${laneKeys.join(",")}:$hitboxVisible:$hitboxOpacity:$areaX:$areaWidth:$hideHint:$vSliceStyle:$hidePause:$devButton';
 		} else if (newMode == MENU || newMode == EDITOR) {
 			newKey += ':' + Type.getClassName(Type.getClass(FlxG.state));
 			// the mod switcher (TAB) opens over the menus and needs the full controls
@@ -716,6 +725,8 @@ class MobileInput extends Sprite {
 			hitboxOnGame = Options.getData("hitboxArea") == "GAME";
 			hideHint = Options.getData("hideHitboxHint") == true;
 			vSliceStyle = Options.getData("hitboxStyle") == "V-SLICE";
+			hidePause = Options.getData("hidePauseButton") == true;
+			devButton = Options.getData("developer") == true && !(Options.getData("disableDebugMenus") == true);
 
 			var opacity:Dynamic = Options.getData("hitboxOpacity");
 			if (opacity != null)
@@ -987,7 +998,15 @@ class MobileInput extends Sprite {
 				}
 
 				var size:Float = Math.min(stageWidth, stageHeight) * 0.11;
-				addButton(getPauseKey(), "II", stageWidth - size - size * 0.4, size * 0.4, size);
+				var buttonX:Float = stageWidth - size - size * 0.4;
+				var buttonY:Float = size * 0.4;
+				if (!hidePause) {
+					addButton(getPauseKey(), "II", buttonX, buttonY, size);
+					buttonY += size * 1.3;
+				}
+				// developer mode: opens the chart editor from inside the song
+				if (devButton)
+					addButton(Keyboard.NUMBER_7, "7", buttonX, buttonY, size);
 			case MENU:
 				{
 					var size:Float = Math.min(stageWidth, stageHeight) * 0.14;
