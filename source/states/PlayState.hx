@@ -1919,7 +1919,23 @@ class PlayState extends MusicBeatState {
 		if (!SONG.moveCamera) {
 			// the engine doesn't place the camera by sections in this chart (base game / V-Slice charts: scripts and events do it), so it
 			// can't be placed again here: the direction is added on top of wherever the camera is looking, and taken off before the next one
+			// nobody moved the camera since the last frame: its base position is what is there minus what was added
+			var stillMine:Bool = camFollow.x == directionAppliedX && camFollow.y == directionAppliedY;
+			var baseX:Float = stillMine ? camFollow.x - directionOffsetX : camFollow.x;
+			var baseY:Float = stillMine ? camFollow.y - directionOffsetY : camFollow.y;
+
+			// these charts move the camera with events / scripts, which don't always agree with "mustHitSection": the character that the
+			// camera is looking at (the closest one) is the one whose direction is tracked
 			var target:Character = section.mustHitSection ? boyfriend : dad;
+			var dadMid:FlxPoint = dad.getMainCharacter().getMidpoint();
+			var bfMid:FlxPoint = boyfriend.getMainCharacter().getMidpoint();
+			var dadDistance:Float = Math.abs(dadMid.x + 150 - baseX) + Math.abs(dadMid.y - 100 - baseY);
+			var bfDistance:Float = Math.abs(bfMid.x - 100 - baseX) + Math.abs(bfMid.y - 100 - baseY);
+			if (Math.abs(dadDistance - bfDistance) > 40)
+				target = dadDistance < bfDistance ? dad : boyfriend;
+			dadMid.put();
+			bfMid.put();
+
 			var offsetX:Float = 0;
 			var offsetY:Float = 0;
 			var animName:String = target.getMainCharacter().hasAnims() ? target.getMainCharacter().curAnimName().toLowerCase() : "";
@@ -1939,10 +1955,6 @@ class PlayState extends MusicBeatState {
 					offsetY = 50;
 			}
 
-			// nobody moved the camera since the last frame: its base position is what is there minus what was added
-			var stillMine:Bool = camFollow.x == directionAppliedX && camFollow.y == directionAppliedY;
-			var baseX:Float = stillMine ? camFollow.x - directionOffsetX : camFollow.x;
-			var baseY:Float = stillMine ? camFollow.y - directionOffsetY : camFollow.y;
 			camFollow.setPosition(baseX + offsetX, baseY + offsetY);
 			directionAppliedX = camFollow.x;
 			directionAppliedY = camFollow.y;

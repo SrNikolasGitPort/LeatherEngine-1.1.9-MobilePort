@@ -28,14 +28,6 @@ class MobileSettings {
 			return;
 		started = true;
 
-		#if android
-		// the back button reaches the game as a key (ESC) instead of closing the activity
-		try {
-			var setenv:Dynamic = JNI.createStaticMethod("org/libsdl/app/SDLActivity", "nativeSetenv", "(Ljava/lang/String;Ljava/lang/String;)V");
-			setenv("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
-		} catch (e:Dynamic) {}
-		#end
-
 		enableImmersive();
 		Lib.current.stage.addEventListener(Event.ACTIVATE, (_) -> enableImmersive());
 		Application.current.window.onFocusIn.add(enableImmersive);
