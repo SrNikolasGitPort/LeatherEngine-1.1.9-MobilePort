@@ -1817,13 +1817,14 @@ class ChartingState extends MusicBeatState {
 			note.y = Math.floor(getYfromStrum((daStrumTime - sectionStartTime())) + Std.parseFloat(PlayState.instance.arrow_Configs.get(daType)[3]));
 
 			#if mobile
-			if (daType == "death" && note.frameWidth >= 240) {
+			var deathRatio:Float = daType == "death" ? Note.deathBodyRatio(note) : -1;
+			if (deathRatio > 0) {
 				// original size of the chart editor, only the offset is changed: it is centered on its square of the grid (the offset of the
 				// arrow config left it too high, so it looked early)
 				note.x = Math.floor((daNoteInfo + 1) * GRID_SIZE) + (GRID_SIZE - note.width) / 2;
 				// (the glow ring is above the arrow, so the arrow is below the middle of the sprite)
 				note.y = Math.floor(getYfromStrum((daStrumTime - sectionStartTime()))) + (GRID_SIZE - note.height) / 2
-					- (Note.DEATH_BODY_CENTER - 0.5) * note.height;
+					- (deathRatio - 0.5) * note.height;
 			}
 			#end
 			note.antialiasing = uiSettings[3] == "true";
