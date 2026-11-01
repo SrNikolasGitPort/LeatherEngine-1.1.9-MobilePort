@@ -266,7 +266,7 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		}
 
 		// nothing weird: the middle of an arrow is somewhere inside of its sprite
-		if (ratio < 0.3 || ratio > 0.8)
+		if (ratio < 0.3 || ratio > 0.95)
 			ratio = -1;
 
 		deathBodyCache.set(cacheKey, ratio);
@@ -285,25 +285,41 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 	}
 
 	static function findFrames(note:Note):FlxAtlasFrames {
-		var disallowGPU:Bool = #if MODCHARTING_TOOLS note.song.modchartingTools
-			|| FlxG.state is modcharting.ModchartEditorState #else false #end;
+		return framesOf(note.song.ui_Skin, note.arrow_Type, #if MODCHARTING_TOOLS note.song.modchartingTools
+			|| FlxG.state is modcharting.ModchartEditorState #else false #end);
+	}
 
-		if (PlayState.instance.types.contains(note.arrow_Type)) {
-			var basePath:String = 'ui skins/${note.song.ui_Skin}/arrows/';
-			if (Assets.exists(Paths.image('$basePath${note.arrow_Type}', 'shared'))) {
-				return Paths.getSparrowAtlas('$basePath${note.arrow_Type}', 'shared', disallowGPU);
+	static function framesOf(skin:String, type:String, disallowGPU:Bool):FlxAtlasFrames {
+		if (PlayState.instance.types.contains(type)) {
+			var basePath:String = 'ui skins/$skin/arrows/';
+			if (Assets.exists(Paths.image('$basePath$type', 'shared'))) {
+				return Paths.getSparrowAtlas('$basePath$type', 'shared', disallowGPU);
 			} else if (Assets.exists(Paths.image('${basePath}default', 'shared'))) {
 				return Paths.getSparrowAtlas('${basePath}default', 'shared', disallowGPU);
 			}
 		} else {
 			var basePath:String = 'ui skins/default/arrows/';
-			if (Assets.exists(Paths.image('$basePath${note.arrow_Type}', 'shared'))) {
-				return Paths.getSparrowAtlas('$basePath${note.arrow_Type}', 'shared', disallowGPU);
-			} else if (Assets.exists(Paths.image('ui skins/${note.song.ui_Skin}/arrows/default', 'shared'))) {
-				return Paths.getSparrowAtlas('ui skins/${note.song.ui_Skin}/arrows/default', 'shared', disallowGPU);
+			if (Assets.exists(Paths.image('$basePath$type', 'shared'))) {
+				return Paths.getSparrowAtlas('$basePath$type', 'shared', disallowGPU);
+			} else if (Assets.exists(Paths.image('ui skins/$skin/arrows/default', 'shared'))) {
+				return Paths.getSparrowAtlas('ui skins/$skin/arrows/default', 'shared', disallowGPU);
 			}
 		}
 		return Paths.getSparrowAtlas('ui skins/default/arrows/default', 'shared', disallowGPU);
+	}
+
+	/**
+	 * Height of the normal arrow of the skin (154 in the skin of the engine): the death note is lined up with the middle of it. The mods
+	 * have their own arrows, with other sizes.
+	 */
+	static function normalArrowHeight(note:Note, animationName:String):Float {
+		try {
+			var normal:FlxAtlasFrames = framesOf(note.song.ui_Skin, "default", false);
+			var frame:flixel.graphics.frames.FlxFrame = normal?.getByName(animationName + "0000");
+			if (frame != null && frame.sourceSize.y > 0)
+				return frame.sourceSize.y;
+		} catch (e:Dynamic) {}
+		return 154;
 	}
 
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?character:Int = 0, ?arrowType:String = "default",
@@ -406,7 +422,7 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 			// the mods work the same way.
 			updateHitbox();
 			var frameHeight:Float = frame != null ? frame.sourceSize.y : 230;
-			noteYOffset = (frameHeight * deathRatio - 154 / 2) * lmaoStuff;
+			noteYOffset = (frameHeight * deathRatio - normalArrowHeight(this, animationName) / 2) * lmaoStuff;
 			downSign = 1;
 		}
 		#end
