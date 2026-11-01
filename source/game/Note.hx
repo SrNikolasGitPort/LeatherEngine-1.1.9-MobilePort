@@ -44,6 +44,8 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 
 	public var xOffset:Float = 0;
 
+	var roundedSpeed:Float = 0;
+	var roundedSpeedSource:Float = Math.NaN;
 	var positionKeyText:String = null;
 	var keyData:Int = -1;
 	var keyType:String = null;
@@ -169,7 +171,28 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		}
 	}
 
+	static var frameCache:Map<String, FlxAtlasFrames> = [];
+
+	/**
+	 * Every note used to look for its atlas on the disk again (several file checks per note), which made the songs load slowly on phones.
+	 * The atlas of each skin / note type is now found once.
+	 */
+	public static function clearFrameCache():Void {
+		frameCache.clear();
+	}
+
 	public static function getFrames(note:Note):FlxAtlasFrames {
+		var cacheKey:String = note.song.ui_Skin + "|" + note.arrow_Type;
+		var cached:FlxAtlasFrames = frameCache.get(cacheKey);
+		if (cached != null && cached.parent != null && !cached.parent.isDestroyed)
+			return cached;
+
+		var found:FlxAtlasFrames = findFrames(note);
+		frameCache.set(cacheKey, found);
+		return found;
+	}
+
+	static function findFrames(note:Note):FlxAtlasFrames {
 		var disallowGPU:Bool = #if MODCHARTING_TOOLS note.song.modchartingTools
 			|| FlxG.state is modcharting.ModchartEditorState #else false #end;
 
@@ -288,7 +311,7 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 			// has to be lifted by half of the extra height (the original offset lifted it too much, so it came early) - the same for upscroll and downscroll.
 			updateHitbox();
 			var artCenter:Float = frame != null ? (frame.offset.y + frame.sourceSize.y) / 2 : 119;
-			noteYOffset = (artCenter - 154 / 2 + 8) * lmaoStuff; // +8: a little higher, as asked
+			noteYOffset = (artCenter - 154 / 2 + 30) * lmaoStuff; // a little higher than before, as asked
 			downSign = 1;
 		}
 		#end
@@ -366,7 +389,12 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 	public inline function calculateY(myStrum:StrumNote):Void {
 		var strumY:Float = myStrum.y;
 
-		var posMath:Float = (0.45 * (Conductor.songPosition - strumTime) * FlxMath.roundDecimal(speed, 2));
+		if (speed != roundedSpeedSource) {
+			roundedSpeedSource = speed;
+			roundedSpeed = FlxMath.roundDecimal(speed, 2);
+		}
+
+		var posMath:Float = (0.45 * (Conductor.songPosition - strumTime) * roundedSpeed);
 
 		if (!Options.getData("downscroll")) {
 			y = strumY - posMath;

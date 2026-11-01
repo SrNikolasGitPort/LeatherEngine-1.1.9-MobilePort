@@ -42,6 +42,7 @@ class OptionsMenu extends MusicBeatState {
 			new BoolOption("Hide Hitbox Hint", "hideHitboxHint",
 				"The colored lanes are invisible, but the lane you touch lights up.\n(Hitbox Visible OFF hides them completely.)"),
 			new BoolOption("Hide Pause Button", "hidePauseButton", "Hides the pause button during songs.\nUse the Back button of your phone to pause."),
+			new BoolOption("Chart Editor Button", "chartEditorButton", "Shows a \"7\" button during songs that opens the Chart Editor.\nIt sits below the pause button (or where it was, if hidden)."),
 			new StringSaveOption("Hitbox Style", ["CLASSIC", "V-SLICE"], "hitboxStyle",
 				"CLASSIC: flat colored columns.\nV-SLICE (experimental, 4K only): columns that fade in towards the strum line."),
 			new StringSaveOption("Hitbox Area", ["SCREEN", "GAME"], "hitboxArea",

@@ -2202,10 +2202,15 @@ class PlayState extends MusicBeatState {
 		health = Math.max(health, minHealth);
 
 		if (unspawnNotes[0] != null && !switchedStates) {
-			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < (1500.0 * songMultiplier)) {
-				notes.add(unspawnNotes[0]);
-				unspawnNotes.splice(0, 1);
+			// (removing the notes one by one from the start of the list moved the whole list every time, it's done once now)
+			var spawned:Int = 0;
+			var spawnLimit:Float = 1500.0 * songMultiplier;
+			while (spawned < unspawnNotes.length && unspawnNotes[spawned].strumTime - Conductor.songPosition < spawnLimit) {
+				notes.add(unspawnNotes[spawned]);
+				spawned++;
 			}
+			if (spawned > 0)
+				unspawnNotes.splice(0, spawned);
 		}
 
 		if (generatedMusic && !switchedStates && startedCountdown && notes != null && playerStrums.members.length != 0 && enemyStrums.members.length != 0) {
@@ -2215,7 +2220,9 @@ class PlayState extends MusicBeatState {
 				note.active = true;
 				note.calculateY(coolStrum);
 				if (note.isSustainNote) {
-					var swagRect:FlxRect = new FlxRect(0, 0, note.frameWidth, note.frameHeight);
+					// the same rectangle is used again every frame instead of making a new one for every sustain
+					var swagRect:FlxRect = note.clipRect ?? new FlxRect();
+					swagRect.set(0, 0, note.frameWidth, note.frameHeight);
 					// TODO: make this not... this
 					if (Options.getData("downscroll")) {
 						swagRect.height = (coolStrum.y + (coolStrum.height / 2) - note.y) / note.scale.y;

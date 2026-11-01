@@ -726,7 +726,7 @@ class MobileInput extends Sprite {
 			hideHint = Options.getData("hideHitboxHint") == true;
 			vSliceStyle = Options.getData("hitboxStyle") == "V-SLICE";
 			hidePause = Options.getData("hidePauseButton") == true;
-			devButton = Options.getData("developer") == true && !(Options.getData("disableDebugMenus") == true);
+			devButton = Options.getData("chartEditorButton") == true && !(Options.getData("disableDebugMenus") == true);
 
 			var opacity:Dynamic = Options.getData("hitboxOpacity");
 			if (opacity != null)
@@ -1004,7 +1004,7 @@ class MobileInput extends Sprite {
 					addButton(getPauseKey(), "II", buttonX, buttonY, size);
 					buttonY += size * 1.3;
 				}
-				// developer mode: opens the chart editor from inside the song
+				// opens the chart editor from inside the song (Mobile Options > Chart Editor Button)
 				if (devButton)
 					addButton(Keyboard.NUMBER_7, "7", buttonX, buttonY, size);
 			case MENU:

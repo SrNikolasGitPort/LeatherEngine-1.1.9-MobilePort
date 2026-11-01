@@ -96,6 +96,7 @@ class Main extends Sprite {
 		});
 
 		FlxG.signals.preStateCreate.add((state) -> {
+			game.Note.clearFrameCache();
 			CoolUtil.clearMemory();
 		});
 
