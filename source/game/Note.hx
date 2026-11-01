@@ -115,6 +115,11 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 	public static final SCALE_MULT:Float = 1.474;
 
 	/**
+	 * Where the center of the arrow of the death note is inside of its frame (0 = top, 1 = bottom): the glow ring is above it.
+	 */
+	public static inline var DEATH_BODY_CENTER:Float = 0.645;
+
+	/**
 	 * @see https://step-mania.fandom.com/wiki/Notes
 	 */
 	public static var quantColors:Array<Array<Int>> = [
@@ -307,11 +312,13 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		#if mobile
 		// the death note keeps the original size of the engine, only the offset is fixed
 		if (!isSustainNote && arrow_Type == "death" && frameWidth >= 240) {
-			// the death note keeps its original size; only its offset is changed: every note is placed by its top, so the taller death sprite
-			// has to be lifted by half of the extra height (the original offset lifted it too much, so it came early) - the same for upscroll and downscroll.
+			// the death note keeps its original size; only its offset is changed. The art of the sprite has a glow ring on top, so the arrow
+			// itself sits low inside of the frame (its center is about 64.5% of the frame height, measured on the death sprites), while the
+			// center of a normal arrow is in the middle of its 154px: the sprite is lifted until both centers match (the same for upscroll
+			// and downscroll). Everything comes from the frame, so the death sprites of the mods work the same way.
 			updateHitbox();
-			var artCenter:Float = frame != null ? (frame.offset.y + frame.sourceSize.y) / 2 : 119;
-			noteYOffset = (artCenter - 154 / 2 + 30) * lmaoStuff; // a little higher than before, as asked
+			var frameHeight:Float = frame != null ? frame.sourceSize.y : 230;
+			noteYOffset = (frameHeight * DEATH_BODY_CENTER - 154 / 2) * lmaoStuff;
 			downSign = 1;
 		}
 		#end
