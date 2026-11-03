@@ -2494,7 +2494,8 @@ class PlayState extends MusicBeatState {
 			#end
 		}
 
-		if (!Options.getData("disableDebugMenus")) {
+		// (the "7" button of Mobile Options > Chart Editor Button works even with the debug menus disabled, turning it on is the choice)
+		if (!Options.getData("disableDebugMenus") #if mobile || Options.getData("chartEditorButton") == true #end) {
 			if (FlxG.keys.justPressed.SEVEN && !switchedStates && !inCutscene) {
 				openChartEditor();
 			}

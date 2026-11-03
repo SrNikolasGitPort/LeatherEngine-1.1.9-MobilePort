@@ -726,7 +726,7 @@ class MobileInput extends Sprite {
 			hideHint = Options.getData("hideHitboxHint") == true;
 			vSliceStyle = Options.getData("hitboxStyle") == "V-SLICE";
 			hidePause = Options.getData("hidePauseButton") == true;
-			devButton = Options.getData("chartEditorButton") == true && !(Options.getData("disableDebugMenus") == true);
+			devButton = Options.getData("chartEditorButton") == true;
 
 			var opacity:Dynamic = Options.getData("hitboxOpacity");
 			if (opacity != null)
