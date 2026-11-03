@@ -115,11 +115,6 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 	public static final SCALE_MULT:Float = 1.474;
 
 	/**
-	 * Where the center of the arrow of the death note is inside of its frame (0 = top, 1 = bottom): the glow ring is above it.
-	 */
-	public static inline var DEATH_BODY_CENTER:Float = 0.645;
-
-	/**
 	 * @see https://step-mania.fandom.com/wiki/Notes
 	 */
 	public static var quantColors:Array<Array<Int>> = [
@@ -184,93 +179,6 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 	 */
 	public static function clearFrameCache():Void {
 		frameCache.clear();
-		deathBodyCache.clear();
-	}
-
-	static var deathBodyCache:Map<String, Float> = [];
-
-	/**
-	 * Where the middle of the arrow of a death note is inside of its frame (0 = top, 1 = bottom), found in the picture itself, so it works for
-	 * the death arrows of any mod. The glow ring above the arrow makes the sprite look lower than it is, the black body of the arrow is what
-	 * has to line up with the strum. Returns -1 when it can't be found (then the offset of the arrow config is used, like the original engine).
-	 */
-	public static function deathBodyRatio(note:Note):Float {
-		var current:flixel.graphics.frames.FlxFrame = note.frame;
-		if (current == null || current.parent == null || current.angle != flixel.graphics.frames.FlxFrame.FlxFrameAngle.ANGLE_0 || current.sourceSize.y <= 0)
-			return -1;
-
-		var cacheKey:String = current.parent.key + "|" + current.name;
-		if (deathBodyCache.exists(cacheKey))
-			return deathBodyCache.get(cacheKey);
-
-		var ratio:Float = -1;
-		try {
-			var bitmap:openfl.display.BitmapData = current.parent.bitmap;
-			var own:Bool = false;
-			if (bitmap == null || bitmap.image == null) {
-				// the picture was sent to the video memory: a copy is read just to look at it
-				bitmap = Assets.exists(current.parent.key) ? openfl.utils.Assets.getBitmapData(current.parent.key, false) : null;
-				own = bitmap != null;
-			}
-
-			if (bitmap != null && bitmap.image != null) {
-				var region:flixel.math.FlxRect = current.frame;
-				var startX:Int = Std.int(region.x);
-				var startY:Int = Std.int(region.y);
-				var endX:Int = Std.int(region.x + region.width);
-				var endY:Int = Std.int(region.y + region.height);
-
-				var darkMin:Int = 100000;
-				var darkMax:Int = -1;
-				var darkCount:Int = 0;
-				var solidMin:Int = 100000;
-				var solidMax:Int = -1;
-
-				var y:Int = startY;
-				while (y < endY) {
-					var x:Int = startX;
-					while (x < endX) {
-						var pixel:Int = bitmap.getPixel32(x, y);
-						if (((pixel >> 24) & 0xFF) > 200) {
-							if (y < solidMin)
-								solidMin = y;
-							if (y > solidMax)
-								solidMax = y;
-							if (((pixel >> 16) & 0xFF) < 70 && ((pixel >> 8) & 0xFF) < 70 && (pixel & 0xFF) < 70) {
-								darkCount++;
-								if (y < darkMin)
-									darkMin = y;
-								if (y > darkMax)
-									darkMax = y;
-							}
-						}
-						x += 2;
-					}
-					y += 2;
-				}
-
-				var center:Float = -1;
-				if (darkCount > 50)
-					center = (darkMin + darkMax) / 2 - startY;
-				else if (solidMax >= 0)
-					center = (solidMin + solidMax) / 2 - startY;
-
-				if (center >= 0)
-					ratio = (center + current.offset.y) / current.sourceSize.y;
-			}
-
-			if (own)
-				bitmap.dispose();
-		} catch (e:Dynamic) {
-			ratio = -1;
-		}
-
-		// nothing weird: the middle of an arrow is somewhere inside of its sprite
-		if (ratio < 0.3 || ratio > 0.95)
-			ratio = -1;
-
-		deathBodyCache.set(cacheKey, ratio);
-		return ratio;
 	}
 
 	public static function getFrames(note:Note):FlxAtlasFrames {
@@ -306,20 +214,6 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 			}
 		}
 		return Paths.getSparrowAtlas('ui skins/default/arrows/default', 'shared', disallowGPU);
-	}
-
-	/**
-	 * Height of the normal arrow of the skin (154 in the skin of the engine): the death note is lined up with the middle of it. The mods
-	 * have their own arrows, with other sizes.
-	 */
-	static function normalArrowHeight(note:Note, animationName:String):Float {
-		try {
-			var normal:FlxAtlasFrames = framesOf(note.song.ui_Skin, "default", false);
-			var frame:flixel.graphics.frames.FlxFrame = normal?.getByName(animationName + "0000");
-			if (frame != null && frame.sourceSize.y > 0)
-				return frame.sourceSize.y;
-		} catch (e:Dynamic) {}
-		return 154;
 	}
 
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?character:Int = 0, ?arrowType:String = "default",
@@ -412,20 +306,6 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 
 		var noteYOffset:Float = Std.parseFloat(PlayState.instance.arrow_Configs.get(arrow_Type)[0]) * lmaoStuff * sizeFix;
 		var downSign:Float = Options.getData("downscroll") ? -1 : 1;
-		#if mobile
-		// the death note keeps the original size of the engine, only the offset is fixed
-		var deathRatio:Float = !isSustainNote && arrow_Type == "death" ? deathBodyRatio(this) : -1;
-		if (deathRatio > 0) {
-			// the death note keeps its original size; only its offset is changed. The art of the sprite has a glow ring on top, so the arrow
-			// itself sits low inside of the frame, while the center of a normal arrow is in the middle of its 154px: the sprite is lifted
-			// until both centers match (the same for upscroll and downscroll). The arrow is found in the picture, so the death sprites of
-			// the mods work the same way.
-			updateHitbox();
-			var frameHeight:Float = frame != null ? frame.sourceSize.y : 230;
-			noteYOffset = (frameHeight * deathRatio - normalArrowHeight(this, animationName) / 2) * lmaoStuff;
-			downSign = 1;
-		}
-		#end
 		offset.y += noteYOffset * downSign;
 
 		shouldHit = PlayState.instance.type_Configs.get(arrow_Type)[0] == "true";
