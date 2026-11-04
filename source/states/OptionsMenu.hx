@@ -230,8 +230,9 @@ class OptionsMenu extends MusicBeatState {
 		for (mod in modding.ModList.getActiveMods(modding.PolymodHandler.metadataArrays)) {
 			getPage("Mod Options").push(new PageOption(mod, mod, modding.ModList.modMetadatas.get(mod)?.description ?? "no description"));
 			pages.set(mod, [new PageOption("Back", "Mod Options", "Go back to mod options.")]);
-			if (sys.FileSystem.exists('mods/$mod/data/options.json')) {
-				var modOptions:modding.ModOptions = cast Json.parse(sys.io.File.getContent('mods/$mod/data/options.json'));
+			var modOptionsPath:String = modding.ModFiles.fix('mods/$mod/data/options.json');
+			if (sys.FileSystem.exists(modOptionsPath)) {
+				var modOptions:modding.ModOptions = cast Json.parse(sys.io.File.getContent(modOptionsPath));
 				for (option in modOptions.options) {
 					switch (StringTools.trim(option.type).toLowerCase()) { // thank you haxe for not wanting to cast it to a string.
 						case "bool":

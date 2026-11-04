@@ -897,13 +897,17 @@ class PlayState extends MusicBeatState {
 
 		#if MODDING_ALLOWED
 		for (mod in ModList.getActiveMods(PolymodHandler.metadataArrays)) {
-			if (FileSystem.exists('mods/$mod/data/scripts/global/')) {
-				foldersToCheck.push('mods/$mod/data/scripts/global/');
+			var globalScripts:String = modding.ModFiles.fix('mods/$mod/data/scripts/global/');
+			if (FileSystem.exists(globalScripts)) {
+				foldersToCheck.push(globalScripts + (globalScripts.endsWith("/") ? "" : "/"));
 			}
 		}
 		#end
 
-		for (folder in foldersToCheck) {
+		for (folderPath in foldersToCheck) {
+			var folder:String = modding.ModFiles.fix(folderPath);
+			if (!folder.endsWith("/"))
+				folder += "/";
 			if (FileSystem.exists(folder)) {
 				for (file in FileSystem.readDirectory(folder)) {
 					#if HSCRIPT_ALLOWED

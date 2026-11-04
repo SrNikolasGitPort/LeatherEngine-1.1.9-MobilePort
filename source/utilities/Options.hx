@@ -77,8 +77,9 @@ class Options {
 	public static function initModOptions() {
 		for (mod in modding.ModList.getActiveMods(modding.PolymodHandler.metadataArrays)) {
 			createSave(mod, mod);
-			if (sys.FileSystem.exists('mods/$mod/data/options.json')) {
-				var modOptions:modding.ModOptions = cast Json.parse(sys.io.File.getContent('mods/$mod/data/options.json'));
+			var modOptionsPath:String = modding.ModFiles.fix('mods/$mod/data/options.json');
+			if (sys.FileSystem.exists(modOptionsPath)) {
+				var modOptions:modding.ModOptions = cast Json.parse(sys.io.File.getContent(modOptionsPath));
 				for (option in modOptions.options) {
 					var trimmedType:String = option.type.trim().toLowerCase();
 					if (trimmedType == "bool" || trimmedType == "string") {

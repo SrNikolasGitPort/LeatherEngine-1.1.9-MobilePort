@@ -238,7 +238,7 @@ class Paths {
 	}
 
 	inline static public function existsInMod(path:String, mod:String):Bool {
-		return FileSystem.exists(path.replace('assets', 'mods/$mod'));
+		return FileSystem.exists(modding.ModFiles.fix(path.replace('assets', 'mods/$mod')));
 	}
 
 	inline static public function getModPath(path:String) {

@@ -550,12 +550,12 @@ class CoolUtil {
 
 		var curMod:String = Options.getData("curMod");
 
-		if (FileSystem.exists('./mods/$curMod/data/freeplay.json')) {
+		if (FileSystem.exists(modding.ModFiles.fix('./mods/$curMod/data/freeplay.json'))) {
 			return;
 		}
 
 		for (location in possibleLocations) {
-			var pathToCheck:String = './mods/$curMod/$location';
+			var pathToCheck:String = modding.ModFiles.fix('./mods/$curMod/$location');
 			if (FileSystem.exists(pathToCheck)) {
 				if (!FileSystem.exists('./mods/$curMod/data/')) {
 					FileSystem.createDirectory('./mods/$curMod/data');

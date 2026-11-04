@@ -46,7 +46,7 @@ class MobileFiles {
 	/**
 	 * Increase this if the bundled mods change in a way that needs to be copied again.
 	 */
-	static inline var SETUP_VERSION:Int = 2;
+	static inline var SETUP_VERSION:Int = 3;
 
 	static inline var MARKER:String = ".leather_setup";
 	static inline var MODE_FILE:String = "storage_mode.txt";
@@ -239,7 +239,10 @@ class MobileFiles {
 	}
 
 	/**
-	 * Copies every bundled `mods/` file that doesn't exist on the disk yet (files the user changed are never overwritten).
+	 * Copies the bundled files to the engine folder:
+	 * - `mods/`: every file that doesn't exist on the disk yet (files the user changed are never overwritten),
+	 * - `assets/`: the files of the game, like on the computer (some mods read them from the folder). They are written again if the size is
+	 *   different, as the game files change with the updates.
 	 *
 	 * Meant to run on a background thread, `progress` and `currentFile` are updated while it runs.
 	 *
@@ -251,22 +254,37 @@ class MobileFiles {
 		error = null;
 
 		try {
-			var ids:Array<String> = [];
+			// every file to copy: the bundled library it's in (null = the main one), the id inside of it and where it's saved
+			var files:Array<{library:Null<lime.utils.AssetLibrary>, id:String}> = [];
 			for (id in LimeAssets.list()) {
-				if (id.startsWith("mods/"))
-					ids.push(id);
+				if (id.startsWith("mods/") || id.startsWith("assets/"))
+					files.push({library: null, id: id});
+			}
+			// (the libraries of Project.xml)
+			for (name in ["shared", "songs", "stages", "fonts"]) {
+				var library:lime.utils.AssetLibrary = LimeAssets.getLibrary(name);
+				if (library == null)
+					continue;
+
+				for (id in library.list(null)) {
+					if (id.startsWith("assets/"))
+						files.push({library: library, id: id});
+				}
 			}
 
 			var done:Int = 0;
-			for (id in ids) {
+			for (entry in files) {
+				var id:String = entry.id;
 				currentFile = id;
 
 				var target:String = Path.join([storageDirectory, id]);
-				if (!FileSystem.exists(target)) {
-					createDirectories(Path.directory(target));
+				var isGameFile:Bool = id.startsWith("assets/");
 
-					var bytes = LimeAssets.getBytes(id);
-					if (bytes != null) {
+				if (isGameFile || !FileSystem.exists(target)) {
+					var bytes = entry.library != null ? entry.library.getBytes(id) : LimeAssets.getBytes(id);
+					if (bytes != null && !(isGameFile && FileSystem.exists(target) && FileSystem.stat(target).size == bytes.length)) {
+						createDirectories(Path.directory(target));
+
 						// write to a temporary file first so a killed app never leaves a half written file behind
 						var temp:String = target + ".part";
 						File.saveBytes(temp, bytes);
@@ -275,7 +293,7 @@ class MobileFiles {
 				}
 
 				done++;
-				progress = done / ids.length;
+				progress = done / files.length;
 			}
 
 			File.saveContent(Path.join([storageDirectory, MARKER]), Std.string(SETUP_VERSION));

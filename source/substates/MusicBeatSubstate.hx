@@ -26,8 +26,9 @@ class MusicBeatSubstate extends FlxSubState {
 		super.create();
 		#if HSCRIPT_ALLOWED
 		var statePath:String = Type.getClassName(Type.getClass(this)).replace(".", "/");
-		if (sys.FileSystem.exists('mods/${Options.getData("curMod")}/classes/${statePath}.hx')) {
-			stateScript = new HScript('mods/${Options.getData("curMod")}/classes/${statePath}.hx');
+		var scriptPath:String = modding.ModFiles.fix('mods/${Options.getData("curMod")}/classes/${statePath}.hx');
+		if (sys.FileSystem.exists(scriptPath)) {
+			stateScript = new HScript(scriptPath);
 		}
 		#end
 	}

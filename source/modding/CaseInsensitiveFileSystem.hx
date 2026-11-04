@@ -59,7 +59,7 @@ class CaseInsensitiveFileSystem extends SysFileSystem {
 	/**
 	 * The real path of a file or folder, or `null` if it doesn't exist (even ignoring the case).
 	 */
-	static function find(path:String):Null<String> {
+	public static function find(path:String):Null<String> {
 		if (path == null || path == "")
 			return null;
 

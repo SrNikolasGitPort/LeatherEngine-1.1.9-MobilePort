@@ -485,10 +485,12 @@ class StoryMenuState extends MusicBeatState {
 
 	function loadGroups():Void {
 		#if MODDING_ALLOWED
-		if (sys.FileSystem.exists("mods/" + Options.getData("curMod") + "/data/storyWeekList.txt")) {
-			initWeekList = CoolUtil.coolTextFileSys("mods/" + Options.getData("curMod") + "/data/storyWeekList.txt");
-		} else if (sys.FileSystem.exists("mods/" + Options.getData("curMod") + "/_append/data/storyWeekList.txt")) {
-			initWeekList = CoolUtil.coolTextFileSys("mods/" + Options.getData("curMod") + "/_append/data/storyWeekList.txt");
+		var weekListPath:String = modding.ModFiles.fix("mods/" + Options.getData("curMod") + "/data/storyWeekList.txt");
+		var appendWeekListPath:String = modding.ModFiles.fix("mods/" + Options.getData("curMod") + "/_append/data/storyWeekList.txt");
+		if (sys.FileSystem.exists(weekListPath)) {
+			initWeekList = CoolUtil.coolTextFileSys(weekListPath);
+		} else if (sys.FileSystem.exists(appendWeekListPath)) {
+			initWeekList = CoolUtil.coolTextFileSys(appendWeekListPath);
 		}
 		#else
 		initWeekList = CoolUtil.coolTextFile(Paths.txt('storyWeekList'));

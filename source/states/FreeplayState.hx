@@ -115,7 +115,7 @@ class FreeplayState extends MusicBeatState {
 		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
 			TitleState.playTitleMusic();
 
-		var path:String = #if MODDING_ALLOWED 'mods/${Options.getData("curMod")}/data/freeplay.json'; #else 'assets/data/freeplay.json'; #end
+		var path:String = #if MODDING_ALLOWED modding.ModFiles.fix('mods/${Options.getData("curMod")}/data/freeplay.json'); #else 'assets/data/freeplay.json'; #end
 		if (FileSystem.exists(path)) {
 			songs = cast Json.parse(File.getContent(path)).songs;
 		}
