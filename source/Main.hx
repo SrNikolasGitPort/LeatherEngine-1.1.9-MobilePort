@@ -97,6 +97,9 @@ class Main extends Sprite {
 
 		FlxG.signals.preStateCreate.add((state) -> {
 			game.Note.clearFrameCache();
+			#if (MODDING_ALLOWED && mobile)
+			modding.CaseInsensitiveFileSystem.clearCache();
+			#end
 			CoolUtil.clearMemory();
 		});
 

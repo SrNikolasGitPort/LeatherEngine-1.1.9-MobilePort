@@ -12,7 +12,14 @@ class NdllLoader {
 	 * @return Dynamic
 	 */
 	public static function load(ndll:String, func:String, args:Int, lazy:Bool = false):Dynamic {
+		#if mobile
+		// the .ndll files that the mods bring are made for Windows / Linux / Mac and can't be loaded on Android: the mod gets a function that
+		// does nothing (and gives `null`) instead of an error, so its script keeps running without that effect
+		trace('"$ndll.ndll" ($func) is made for the computer and does nothing on Android.', WARNING);
+		return Reflect.makeVarArgs(function(_:Array<Dynamic>):Dynamic return null);
+		#else
 		return CFFI.load(Paths.getModPath('assets/ndlls/$ndll.ndll'), func, args, lazy);
+		#end
 	}
     
     /**
@@ -23,6 +30,9 @@ class NdllLoader {
      * @return Dynamic
      */
     public static function call(func:Dynamic, args:Array<Dynamic>):Dynamic{
+        if (func == null)
+            return null;
+
         switch(args.length){
             case 0: 
                 return func();

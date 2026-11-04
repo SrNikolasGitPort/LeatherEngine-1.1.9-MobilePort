@@ -9,8 +9,16 @@ class PolymodHandler {
     public static function loadMods() {
         loadModMetadata();
 
+		#if mobile
+		CaseInsensitiveFileSystem.clearCache();
+		#end
+
 		Polymod.init({
 			modRoot:"mods/",
+			#if mobile
+			// Android tells uppercase and lowercase letters apart in file names, mods made on Windows don't
+			customFilesystem: CaseInsensitiveFileSystem,
+			#end
 			dirs: ModList.getActiveMods(metadataArrays),
             framework: OPENFL,
 			errorCallback: function(error:PolymodError)
