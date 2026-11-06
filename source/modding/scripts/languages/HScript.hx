@@ -135,6 +135,8 @@ class HScript extends Script {
 
 		#if DISCORD_ALLOWED
 		set('DiscordClient', utilities.DiscordClient);
+		#else
+		set('DiscordClient', modding.ScriptStubs.ScriptDiscordClient);
 		#end
 
 		#if MODDING_ALLOWED
@@ -177,6 +179,18 @@ class HScript extends Script {
 
 		set("import", function(class_name:String) {
 			var classes = class_name.split(".");
+
+			#if mobile
+			// (the ndll files of the mods can't be loaded on Android)
+			if (class_name == "lime.system.CFFI") {
+				set("CFFI", modding.ScriptStubs.ScriptCFFI);
+				return;
+			}
+			#end
+
+			// the Discord class of the mods is "utilities.Discord.DiscordClient" in the old versions of the engine, `DiscordClient` is always set
+			if (classes[classes.length - 1] == "DiscordClient" && Type.resolveClass(class_name) == null)
+				return;
 
 			if (Type.resolveClass(class_name) != null)
 				set(classes[classes.length - 1], Type.resolveClass(class_name));
