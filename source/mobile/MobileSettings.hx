@@ -42,21 +42,34 @@ class MobileSettings {
 		#end
 	}
 
+	static var appliedMode:String = "";
+
 	/**
-	 * Sets the fullscreen mode from the `mobileFullscreen` option, or from `value` if it is given.
+	 * Sets how the game fits the screen from the `mobileScreenMode` option:
+	 * - NORMAL: the original proportions, with black bars if the screen has other proportions,
+	 * - STRETCHED: the picture is stretched over the whole screen,
+	 * - ZOOMED: the original proportions with no black bars, the picture is enlarged until the screen is full (a bit of the top / bottom or
+	 *   of the sides is left out).
 	 */
-	public static function applyFullscreen(?value:Bool):Void {
-		var fullscreen:Bool = value ?? (Options.getData("mobileFullscreen") != false);
+	public static function applyFullscreen():Void {
+		var mode:String = Options.getData("mobileScreenMode");
 
 		enableImmersive();
 
 		try {
-			if (fullscreen) {
-				if (!(FlxG.scaleMode is FillScaleMode))
+			if (mode == appliedMode)
+				return;
+
+			switch (mode) {
+				case "STRETCHED":
 					FlxG.scaleMode = new FillScaleMode();
-			} else if (!(FlxG.scaleMode is RatioScaleMode) || (FlxG.scaleMode is FillScaleMode)) {
-				FlxG.scaleMode = new RatioScaleMode();
+				case "ZOOMED":
+					FlxG.scaleMode = new RatioScaleMode(true);
+				default:
+					mode = "NORMAL";
+					FlxG.scaleMode = new RatioScaleMode();
 			}
+			appliedMode = mode;
 		} catch (e:Dynamic) {}
 	}
 }

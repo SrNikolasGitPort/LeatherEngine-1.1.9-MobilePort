@@ -111,7 +111,7 @@ class Options {
 		setData(false, "loadAsynchronously"); // loading from other threads crashes on Android
 		setData(false, "showTracedLines");
 		setData(false, "checkForUpdates");
-		setData(false, "mobileFullscreen"); // off by default, it stretches the picture
+		setData("NORMAL", "mobileScreenMode"); // NORMAL / STRETCHED / ZOOMED
 		setData(true, "mobileTunedV3");
 	}
 	#end

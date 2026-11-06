@@ -9,8 +9,8 @@
 			"value": 20
 		},
 		{
-			"option": "mobileFullscreen",
-			"value": false
+			"option": "mobileScreenMode",
+			"value": "NORMAL"
 		},
 		{
 			"option": "chartEditorButton",

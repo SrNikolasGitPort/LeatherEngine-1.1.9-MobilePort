@@ -47,8 +47,8 @@ class OptionsMenu extends MusicBeatState {
 				"CLASSIC: flat colored columns.\nV-SLICE (experimental, 4K only): columns that fade in towards the strum line."),
 			new StringSaveOption("Hitbox Area", ["SCREEN", "GAME"], "hitboxArea",
 				"SCREEN: the lanes cover the whole screen.\nGAME: the lanes stay inside the game image, after the black bars."),
-			new BoolOption("Fullscreen", "mobileFullscreen",
-				"On: the game fills the whole screen, without the black bars on the sides.\nOff: normal screen, keeps the original proportions."),
+			new StringSaveOption("Screen", ["NORMAL", "STRETCHED", "ZOOMED"], "mobileScreenMode",
+				"NORMAL: original proportions, with black bars if the screen is wider.\nSTRETCHED: the picture is stretched over the whole screen.\nZOOMED: original proportions with no black bars, the picture is enlarged to fill the screen."),
 		],
 		#end
 		"Gameplay" => () -> [

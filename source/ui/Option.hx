@@ -117,10 +117,6 @@ class BoolOption extends Option {
 				FlxG.allowAntialiasing = FlxSprite.defaultAntialiasing = optionChecked;
 			case "throwExceptionOnError":
 				LogStyle.ERROR.throwException = optionChecked;
-			#if mobile
-			case "mobileFullscreen":
-				mobile.MobileSettings.applyFullscreen(optionChecked);
-			#end
 		}
 	}
 }
@@ -392,6 +388,11 @@ class StringSaveOption extends Option {
 
 	function setData() {
 		Options.setData(currentMode, saveDataName, optionSaveKey);
+
+		#if mobile
+		if (saveDataName == "mobileScreenMode")
+			mobile.MobileSettings.applyFullscreen();
+		#end
 	}
 }
 
