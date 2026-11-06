@@ -64,6 +64,10 @@ class CustomShader extends FlxRuntimeShader {
 		var defaults:Array<ShaderSanitizer.UniformDefault> = [];
 		fragmentSource = ShaderSanitizer.fragment(fragmentSource, defaults);
 		vertexSource = ShaderSanitizer.vertex(vertexSource);
+
+		// optional, for weak phones: calculate with less precision (faster). HIGH (default) keeps the PC look
+		if (fragmentSource != null && utilities.Options.getData("shaderPrecision") == "LOW")
+			fragmentSource = StringTools.replace(fragmentSource, "#pragma header", "#pragma header\nprecision mediump float;");
 		#end
 
 		try {

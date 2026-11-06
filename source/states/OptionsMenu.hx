@@ -48,7 +48,9 @@ class OptionsMenu extends MusicBeatState {
 			new StringSaveOption("Hitbox Area", ["SCREEN", "GAME"], "hitboxArea",
 				"SCREEN: the lanes cover the whole screen.\nGAME: the lanes stay inside the game image, after the black bars."),
 			new StringSaveOption("Screen", ["NORMAL", "STRETCHED", "ZOOMED"], "mobileScreenMode",
-				"NORMAL: original proportions, with black bars if the screen is wider.\nSTRETCHED: the picture is stretched over the whole screen.\nZOOMED: original proportions with no black bars, the picture is enlarged to fill the screen."),
+				"NORMAL: original proportions, with black bars if the screen is wider.\nSTRETCHED: the picture is stretched over the whole screen.\nZOOMED: like NORMAL but with no black bars, the picture fills the whole screen."),
+			new StringSaveOption("Shader Precision", ["HIGH", "LOW"], "shaderPrecision",
+				"HIGH: shaders look exactly like on PC.\nLOW: shaders use less precision, which runs smoother on weak phones (some effects can look slightly different)."),
 		],
 		#end
 		"Gameplay" => () -> [
