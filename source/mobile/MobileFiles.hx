@@ -57,6 +57,14 @@ class MobileFiles {
 	public static var progress(default, null):Float = 0;
 
 	/**
+	 * What is being copied now ("Game files" / "Mods"), how many files there are in all and how many are done.
+	 */
+	public static var phase(default, null):String = "";
+
+	public static var totalFiles(default, null):Int = 0;
+	public static var doneFiles(default, null):Int = 0;
+
+	/**
 	 * Name of the file currently being copied (for the loading screen).
 	 */
 	public static var currentFile(default, null):String = "";
@@ -254,46 +262,57 @@ class MobileFiles {
 		error = null;
 
 		try {
-			// every file to copy: the bundled library it's in (null = the main one), the id inside of it and where it's saved
-			var files:Array<{library:Null<lime.utils.AssetLibrary>, id:String}> = [];
-			for (id in LimeAssets.list()) {
-				if (id.startsWith("mods/") || id.startsWith("assets/"))
-					files.push({library: null, id: id});
-			}
-			// (the libraries of Project.xml)
-			for (name in ["shared", "songs", "stages", "fonts"]) {
+			// every file to copy: the bundled library it's in and its id inside of it (the game files go first, they are small and needed)
+			var gameFiles:Array<{library:lime.utils.AssetLibrary, id:String}> = [];
+			var modFiles:Array<{library:lime.utils.AssetLibrary, id:String}> = [];
+
+			// (the libraries of Project.xml, "default" is the main one)
+			for (name in ["default", "shared", "songs", "stages", "fonts"]) {
 				var library:lime.utils.AssetLibrary = LimeAssets.getLibrary(name);
 				if (library == null)
 					continue;
 
 				for (id in library.list(null)) {
 					if (id.startsWith("assets/"))
-						files.push({library: library, id: id});
+						gameFiles.push({library: library, id: id});
+					else if (name == "default" && id.startsWith("mods/"))
+						modFiles.push({library: library, id: id});
 				}
 			}
 
-			var done:Int = 0;
-			for (entry in files) {
-				var id:String = entry.id;
-				currentFile = id;
+			totalFiles = gameFiles.length + modFiles.length;
+			doneFiles = 0;
 
-				var target:String = Path.join([storageDirectory, id]);
-				var isGameFile:Bool = id.startsWith("assets/");
+			for (group in [{name: "Game files", files: gameFiles}, {name: "Mods", files: modFiles}]) {
+				phase = group.name;
 
-				if (isGameFile || !FileSystem.exists(target)) {
-					var bytes = entry.library != null ? entry.library.getBytes(id) : LimeAssets.getBytes(id);
-					if (bytes != null && !(isGameFile && FileSystem.exists(target) && FileSystem.stat(target).size == bytes.length)) {
-						createDirectories(Path.directory(target));
+				for (entry in group.files) {
+					var id:String = entry.id;
+					currentFile = id;
 
-						// write to a temporary file first so a killed app never leaves a half written file behind
-						var temp:String = target + ".part";
-						File.saveBytes(temp, bytes);
-						FileSystem.rename(temp, target);
+					var target:String = Path.join([storageDirectory, id]);
+					var isGameFile:Bool = id.startsWith("assets/");
+
+					if (isGameFile || !FileSystem.exists(target)) {
+						// a file that can't be read from the game is left out, it doesn't stop the others
+						var bytes:Null<haxe.io.Bytes> = null;
+						try {
+							bytes = entry.library.getBytes(id);
+						} catch (e:Dynamic) {}
+
+						if (bytes != null && !(isGameFile && FileSystem.exists(target) && FileSystem.stat(target).size == bytes.length)) {
+							createDirectories(Path.directory(target));
+
+							// write to a temporary file first so a killed app never leaves a half written file behind
+							var temp:String = target + ".part";
+							File.saveBytes(temp, bytes);
+							FileSystem.rename(temp, target);
+						}
 					}
-				}
 
-				done++;
-				progress = done / files.length;
+					doneFiles++;
+					progress = doneFiles / totalFiles;
+				}
 			}
 
 			File.saveContent(Path.join([storageDirectory, MARKER]), Std.string(SETUP_VERSION));

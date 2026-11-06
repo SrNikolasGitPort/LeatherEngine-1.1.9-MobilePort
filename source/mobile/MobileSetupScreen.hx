@@ -44,6 +44,12 @@ class MobileSetupScreen extends Sprite {
 	var file:TextField;
 	var bar:Sprite;
 	var allowButton:Sprite;
+	var retryButton:Sprite;
+	var percent:TextField;
+	var count:TextField;
+	var hint:TextField;
+	var subtitle:TextField;
+	var shownProgress:Float = 0;
 
 	var copyFinished:Bool = false;
 	var copySuccess:Bool = false;
@@ -53,8 +59,17 @@ class MobileSetupScreen extends Sprite {
 		super();
 		this.onFinish = onFinish;
 
-		title = makeText(34, true);
-		title.text = "Leather Engine";
+		title = makeText(38, true);
+		title.text = "LEATHER ENGINE";
+		subtitle = makeText(16, false);
+		subtitle.text = "1.1.9  ·  Mobile Port";
+		subtitle.alpha = 0.55;
+		percent = makeText(34, true);
+		count = makeText(15, false);
+		count.alpha = 0.7;
+		hint = makeText(13, false);
+		hint.alpha = 0.45;
+		retryButton = makeButton("Try again");
 		status = makeText(20, false);
 		file = makeText(13, false);
 		file.alpha = 0.6;
@@ -62,12 +77,18 @@ class MobileSetupScreen extends Sprite {
 		allowButton = makeButton("Allow access");
 
 		allowButton.addEventListener(MouseEvent.CLICK, (_) -> MobileFiles.requestStorageAccess());
+		retryButton.addEventListener(MouseEvent.CLICK, (_) -> begin());
 
 		addChild(title);
+		addChild(subtitle);
 		addChild(status);
-		addChild(file);
+		addChild(percent);
 		addChild(bar);
+		addChild(count);
+		addChild(file);
+		addChild(hint);
 		addChild(allowButton);
+		addChild(retryButton);
 	}
 
 	function makeText(size:Int, bold:Bool):TextField {
@@ -161,48 +182,103 @@ class MobileSetupScreen extends Sprite {
 	function draw():Void {
 		var stageWidth:Float = Lib.current.stage.stageWidth;
 		var stageHeight:Float = Lib.current.stage.stageHeight;
+		var accent:Int = step == FAILED ? 0xFF6B6B : 0x5FCBFF;
 
+		// background
 		graphics.clear();
-		graphics.beginFill(0x000000);
+		var matrix:openfl.geom.Matrix = new openfl.geom.Matrix();
+		matrix.createGradientBox(stageWidth, stageHeight, Math.PI / 2);
+		graphics.beginGradientFill(openfl.display.GradientType.LINEAR, [0x101830, 0x000000], [1, 1], [0, 255], matrix);
 		graphics.drawRect(0, 0, stageWidth, stageHeight);
 		graphics.endFill();
 
-		title.width = status.width = file.width = stageWidth * 0.8;
-		title.x = status.x = file.x = stageWidth * 0.1;
-		title.y = stageHeight * 0.12;
-		status.y = title.y + 70;
+		// the card in the middle
+		var cardWidth:Float = Math.min(stageWidth * 0.8, 900);
+		var cardHeight:Float = Math.min(stageHeight * 0.62, 400);
+		var cardX:Float = (stageWidth - cardWidth) / 2;
+		var cardY:Float = stageHeight * 0.3;
+		graphics.lineStyle(2, accent, 0.35);
+		graphics.beginFill(0xFFFFFF, 0.06);
+		graphics.drawRoundRect(cardX, cardY, cardWidth, cardHeight, 36, 36);
+		graphics.endFill();
+		graphics.lineStyle();
+
+		// the title is a bit above the card
+		title.width = subtitle.width = stageWidth;
+		title.x = subtitle.x = 0;
+		title.y = stageHeight * 0.07;
+		subtitle.y = title.y + title.textHeight + 8;
+
+		var innerWidth:Float = cardWidth - 80;
+		var innerX:Float = cardX + 40;
+		status.width = percent.width = count.width = file.width = innerWidth;
+		status.x = percent.x = count.x = file.x = innerX;
+		hint.width = stageWidth * 0.8;
+		hint.x = stageWidth * 0.1;
+		hint.y = stageHeight * 0.93;
 
 		bar.graphics.clear();
-		bar.visible = step == COPYING;
+		var copying:Bool = step == COPYING;
+		bar.visible = percent.visible = count.visible = copying;
+		file.visible = copying || step == FAILED;
 		allowButton.visible = step == PERMISSION;
+		retryButton.visible = step == FAILED;
 
 		switch (step) {
 			case PERMISSION:
-				status.text = "Leather Engine keeps its mods in the folder\n\".Leather1.1.9\" in your storage.\nAllow it to access your files to continue.";
-				file.text = "You can change this later in Options > Mobile Options > Storage.";
-				file.y = stageHeight * 0.86;
-
-				layoutButton(allowButton, stageWidth, stageHeight * 0.52);
+				status.text = "Leather Engine keeps its mods and files in the folder\n\".Leather1.1.9\" of your storage.\nAllow it to access your files to continue.";
+				status.y = cardY + 40;
+				hint.text = "The folder can't be changed later: the mods and the assets live there.";
+				layoutButton(allowButton, stageWidth, cardY + cardHeight - 110);
 			case COPYING:
-				status.text = "Preparing the game files...\nThis only happens on the first launch.";
-				file.text = MobileFiles.currentFile;
-				file.y = stageHeight * 0.72;
+				// the bar moves smoothly between the values, the files come in jumps
+				shownProgress += (MobileFiles.progress - shownProgress) * 0.2;
 
-				var barWidth:Float = stageWidth * 0.6;
-				var barHeight:Float = 14;
-				var barX:Float = (stageWidth - barWidth) / 2;
-				var barY:Float = stageHeight * 0.62;
+				var phaseName:String = MobileFiles.phase == "" ? "Preparing" : MobileFiles.phase;
+				status.text = phaseName == "Mods" ? "Installing the mods" : (phaseName == "Game files" ? "Preparing the game files" : "Preparing");
+				status.y = cardY + 36;
 
-				bar.graphics.beginFill(0xFFFFFF, 0.2);
-				bar.graphics.drawRoundRect(barX, barY, barWidth, barHeight, barHeight, barHeight);
-				bar.graphics.beginFill(0x5FCBFF);
-				bar.graphics.drawRoundRect(barX, barY, Math.max(barHeight, barWidth * MobileFiles.progress), barHeight, barHeight, barHeight);
+				percent.text = Std.int(shownProgress * 100) + "%";
+				percent.y = cardY + 90;
+
+				var barWidth:Float = innerWidth;
+				var barHeight:Float = 18;
+				var barY:Float = cardY + 170;
+
+				bar.graphics.beginFill(0xFFFFFF, 0.14);
+				bar.graphics.drawRoundRect(innerX, barY, barWidth, barHeight, barHeight, barHeight);
+				bar.graphics.beginFill(accent);
+				bar.graphics.drawRoundRect(innerX, barY, Math.max(barHeight, barWidth * shownProgress), barHeight, barHeight, barHeight);
 				bar.graphics.endFill();
+
+				count.text = MobileFiles.doneFiles + " / " + MobileFiles.totalFiles + " files";
+				count.y = barY + 34;
+
+				file.text = shorten(MobileFiles.currentFile, 56);
+				file.alpha = 0.4;
+				file.y = barY + 64;
+
+				hint.text = "This only happens on the first launch and after updates.";
 			case FAILED:
-				status.text = "Could not prepare the game files:\n" + MobileFiles.error;
-				file.text = "Make sure there is enough free storage space and restart the game.";
-				file.y = stageHeight * 0.72;
+				status.text = "Could not prepare the game files";
+				status.y = cardY + 36;
+				file.text = Std.string(MobileFiles.error);
+				file.alpha = 0.75;
+				file.y = cardY + 100;
+				hint.text = "Make sure there is enough free storage space, then try again.";
+				layoutButton(retryButton, stageWidth, cardY + cardHeight - 110);
 		}
+	}
+
+	/**
+	 * Cuts the middle of a long path so the start and the end are still seen.
+	 */
+	function shorten(text:String, max:Int):String {
+		if (text == null || text.length <= max)
+			return text == null ? "" : text;
+
+		var keep:Int = Std.int((max - 3) / 2);
+		return text.substr(0, keep) + "..." + text.substr(text.length - keep);
 	}
 
 	function layoutButton(button:Sprite, stageWidth:Float, y:Float):Void {
