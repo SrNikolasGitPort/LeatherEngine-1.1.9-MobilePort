@@ -1105,11 +1105,11 @@ class MobileInput extends Sprite {
 
 		for (i in 0...4) {
 			var spacing:Float = i < 3 ? centers[i + 1] - centers[i] : centers[i] - centers[i - 1];
-			var left:Float = i == 0 ? centers[i] - spacing / 2 : (centers[i] + centers[i - 1]) / 2;
-			var right:Float = i == 3 ? centers[i] + spacing / 2 : (centers[i] + centers[i + 1]) / 2;
-			// a generous area around the arrow, a bit more below it (where the thumb lands)
-			var top:Float = Math.max(0, middles[i] - heights[i] * 1.0);
-			var bottom:Float = Math.min(stageHeight, middles[i] + heights[i] * 1.4);
+			var left:Float = i == 0 ? centers[i] - spacing : (centers[i] + centers[i - 1]) / 2;
+			var right:Float = i == 3 ? centers[i] + spacing : (centers[i] + centers[i + 1]) / 2;
+			// a lane over each arrow: it goes from the top to the bottom of the screen, so the notes coming down are inside it too
+			var top:Float = 0;
+			var bottom:Float = stageHeight;
 			newZones.push([left, top, right - left, bottom - top]);
 		}
 		zones = newZones;

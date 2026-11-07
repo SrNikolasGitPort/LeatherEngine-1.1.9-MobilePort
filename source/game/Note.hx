@@ -277,7 +277,7 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		var sizeFix:Float = 1;
 
 		#if mobile
-		// V-Slice layout: the opponent's notes are hidden (only the glow of his arrows shows), they still count as normal
+		// V-Slice layout: the opponent's notes are hidden (his arrows stay, with the glow), they still count as normal
 		if (PlayState.vSliceLayout && !mustPress && !inEditor)
 			hiddenByLayout = true;
 		// V-Slice layout: the opponent's notes are small, like his arrows

@@ -1682,7 +1682,6 @@ class PlayState extends MusicBeatState {
 			strum.scale.set(strum.scale.x * V_SLICE_ENEMY_SCALE, strum.scale.y * V_SLICE_ENEMY_SCALE);
 			strum.updateHitbox();
 			strum.playAnim("static");
-			strum.hideStatic = true; // the opponent only shows the glow
 			strum.x = 145 + small * i - strum.width / 2;
 			strum.y = FlxG.height * 0.1 - strum.height / 2;
 		}
