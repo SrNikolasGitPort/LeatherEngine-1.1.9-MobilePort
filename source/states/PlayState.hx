@@ -606,6 +606,9 @@ class PlayState extends MusicBeatState {
 
 	var downscrollBeforeVSlice:Null<Bool> = null;
 
+	/** True while the V-Slice layout is using the downscroll without the player having chosen it. */
+	public static var vSliceForcedDownscroll:Bool = false;
+
 	override function create() {
 		// set instance because duh
 		instance = this;
@@ -615,6 +618,7 @@ class PlayState extends MusicBeatState {
 		if (vSliceLayout && !Options.getData("downscroll")) {
 			// the player's arrows are at the bottom, so the notes have to come from the top
 			downscrollBeforeVSlice = false;
+			vSliceForcedDownscroll = true;
 			Options.setTemporary(true, "downscroll");
 		}
 		#end
@@ -2632,6 +2636,7 @@ class PlayState extends MusicBeatState {
 		if (downscrollBeforeVSlice != null) {
 			Options.setTemporary(downscrollBeforeVSlice, "downscroll");
 			downscrollBeforeVSlice = null;
+			vSliceForcedDownscroll = false;
 		}
 		vSliceLayout = false;
 		#end
