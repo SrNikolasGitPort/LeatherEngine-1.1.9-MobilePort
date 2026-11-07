@@ -37,3 +37,22 @@ class ScriptCFFI {
 	}
 }
 #end
+
+#if mobile
+/**
+ * `FlxSprite` for the scripts of mods. A script that loads an image from its path (`new FlxSprite().loadGraphic(Paths.image("..."))`) keeps a copy of
+ * it in the RAM too, and mods with dozens of big images (freeplay ports) filled the memory of phones until the images stopped showing.
+ * Here the image goes to the GPU and the RAM copy is dropped (the same thing `VRAM Sprites` does for the engine's own sprites).
+ */
+class ScriptSprite extends flixel.FlxSprite {
+	override public function loadGraphic(Graphic:flixel.system.FlxAssets.FlxGraphicAsset, Animated:Bool = false, Width:Int = 0, Height:Int = 0, Unique:Bool = false,
+			?Key:String):flixel.FlxSprite {
+		if (Std.isOfType(Graphic, String) && !Animated && !Unique && utilities.Options.getData("vramSprites") == true) {
+			try {
+				Graphic = Paths.gpuFile(cast Graphic);
+			} catch (e:Dynamic) {}
+		}
+		return super.loadGraphic(Graphic, Animated, Width, Height, Unique, Key);
+	}
+}
+#end

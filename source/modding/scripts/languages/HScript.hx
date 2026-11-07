@@ -92,7 +92,11 @@ class HScript extends Script {
 		// global class shit
 		// haxeflixel classes
 		set("FlxG", flixel.FlxG);
+		#if mobile
+		set("FlxSprite", modding.ScriptStubs.ScriptSprite);
+		#else
 		set("FlxSprite", flixel.FlxSprite);
+		#end
 		set("FlxSound", flixel.sound.FlxSound);
 		set('FlxCamera', flixel.FlxCamera);
 		set("FlxMath", flixel.math.FlxMath);

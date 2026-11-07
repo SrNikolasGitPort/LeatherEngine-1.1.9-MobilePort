@@ -99,7 +99,13 @@ class Paths {
 	 * @return The image as a `FlxGraphic`. Will retrun the image path if gpu caching is not possible.
 	 */
 	static public function gpuBitmap(key:String, ?library:String, avoidGPU:Bool = false):FlxGraphicAsset {
-		var file:String = image(key, library);
+		return gpuFile(image(key, library), avoidGPU);
+	}
+
+	/**
+	 * Same as `gpuBitmap` but for a path that is already complete (`Paths.image(...)`).
+	 */
+	static public function gpuFile(file:String, avoidGPU:Bool = false):FlxGraphicAsset {
 		var bitmap:BitmapData = Assets.exists(file) ? OpenFlAssets.getBitmapData(file) : null;
 		if (!Options.getData("vramSprites") || avoidGPU || bitmap?.image == null) {
 			bitmap = null;
