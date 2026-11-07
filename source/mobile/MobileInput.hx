@@ -704,6 +704,16 @@ class MobileInput extends Sprite {
 			return;
 
 		try {
+			// FULL SCREEN: the game is wider than the screen shape of the normal mode, the lanes stay where the normal mode has them
+			if (FlxG.width > FlxG.initialWidth) {
+				var width:Float = Math.round(FlxG.initialWidth * (Lib.current.stage.stageHeight / FlxG.initialHeight));
+				if (width > 0 && width < stageWidth) {
+					areaWidth = width;
+					areaX = Math.round((stageWidth - width) / 2);
+					return;
+				}
+			}
+
 			var x:Float = Math.max(0, FlxG.game.x);
 			var width:Float = FlxG.scaleMode.gameSize.x;
 			if (width > 0 && x + width <= stageWidth + 1) {
