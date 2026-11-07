@@ -1659,13 +1659,20 @@ class PlayState extends MusicBeatState {
 		if (count != 4 || enemyStrums.members.length != 4)
 			return;
 
-		var spacing:Float = 185;
-		var first:Float = (FlxG.width - spacing * (count - 1)) / 2;
+		// two arrows on the left, two on the right, a wider gap in the middle (like the V-Slice mobile controls)
+		var pairSpacing:Float = 170;
+		var middleGap:Float = 300;
+		var centers:Array<Float> = [
+			FlxG.width / 2 - middleGap / 2 - pairSpacing,
+			FlxG.width / 2 - middleGap / 2,
+			FlxG.width / 2 + middleGap / 2,
+			FlxG.width / 2 + middleGap / 2 + pairSpacing
+		];
 		var centerY:Float = FlxG.height * 0.83;
 
 		for (i in 0...count) {
 			var strum:StrumNote = playerStrums.members[i];
-			strum.x = first + spacing * i - strum.width / 2;
+			strum.x = centers[i] - strum.width / 2;
 			strum.y = centerY - strum.height / 2;
 		}
 
@@ -1675,6 +1682,7 @@ class PlayState extends MusicBeatState {
 			strum.scale.set(strum.scale.x * V_SLICE_ENEMY_SCALE, strum.scale.y * V_SLICE_ENEMY_SCALE);
 			strum.updateHitbox();
 			strum.playAnim("static");
+			strum.hideStatic = true; // the opponent only shows the glow
 			strum.x = 145 + small * i - strum.width / 2;
 			strum.y = FlxG.height * 0.1 - strum.height / 2;
 		}

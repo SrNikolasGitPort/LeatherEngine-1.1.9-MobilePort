@@ -216,6 +216,15 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		return Paths.getSparrowAtlas('ui skins/default/arrows/default', 'shared', disallowGPU);
 	}
 
+	/** V-Slice mobile layout: the opponent's notes aren't drawn. */
+	public var hiddenByLayout:Bool = false;
+
+	override function draw():Void {
+		if (hiddenByLayout)
+			return;
+		super.draw();
+	}
+
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?character:Int = 0, ?arrowType:String = "default",
 			?song:SongData, ?characters:Array<Int>, ?mustPress:Bool = false, ?inEditor:Bool = false) {
 		super();
@@ -268,6 +277,9 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		var sizeFix:Float = 1;
 
 		#if mobile
+		// V-Slice layout: the opponent's notes are hidden (only the glow of his arrows shows), they still count as normal
+		if (PlayState.vSliceLayout && !mustPress && !inEditor)
+			hiddenByLayout = true;
 		// V-Slice layout: the opponent's notes are small, like his arrows
 		if (PlayState.vSliceLayout && !mustPress && !inEditor) {
 			scale.x *= PlayState.V_SLICE_ENEMY_SCALE;

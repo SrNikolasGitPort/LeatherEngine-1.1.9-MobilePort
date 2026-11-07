@@ -121,6 +121,17 @@ class StrumNote extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else FlxS
 		playAnim('static');
 	}
 
+	/**
+	 * Only draws the arrow while it glows (V-Slice mobile layout: the opponent's arrows are hidden).
+	 */
+	public var hideStatic:Bool = false;
+
+	override function draw():Void {
+		if (hideStatic && animation.name == "static")
+			return;
+		super.draw();
+	}
+
 	override function update(elapsed:Float) {
 		#if MODCHARTING_TOOLS angle3D.z #else angle #end = modAngle;
 		if (resetAnim > 0) {
