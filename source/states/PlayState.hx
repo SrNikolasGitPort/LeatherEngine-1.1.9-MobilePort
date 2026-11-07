@@ -1717,7 +1717,11 @@ class PlayState extends MusicBeatState {
 			}
 
 			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
-			babyArrow.x += ((FlxG.width / 2) * pos);
+			babyArrow.x += ((#if mobile FlxG.initialWidth #else FlxG.width #end / 2) * pos);
+			#if mobile
+			// wide screen: keep the original arrangement but centered on the wider stage
+			babyArrow.x += (FlxG.width - FlxG.initialWidth) / 2;
+			#end
 
 			strumLineNotes.add(babyArrow);
 
