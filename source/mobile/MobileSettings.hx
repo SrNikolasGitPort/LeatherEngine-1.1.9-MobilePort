@@ -48,7 +48,7 @@ class MobileSettings {
 	 * Sets how the game fits the screen from the `mobileScreenMode` option:
 	 * - NORMAL: the original proportions, with black bars if the screen has other proportions,
 	 * - STRETCHED: the picture is stretched over the whole screen,
-	 * - ZOOMED: like NORMAL but with no black bars, the picture is widened to use the whole width of the screen (see `FullWidthScaleMode`).
+	 * - ZOOMED: wide screen like FNF Mobile: same proportions, no black bars, the stage gets wider (see `FullWidthScaleMode`).
 	 */
 	public static function applyFullscreen():Void {
 		var mode:String = Options.getData("mobileScreenMode");
@@ -59,30 +59,21 @@ class MobileSettings {
 			if (mode == appliedMode)
 				return;
 
+			// leaving the wide screen: the stage goes back to 1280x720
+			if (appliedMode == "ZOOMED" && mode != "ZOOMED")
+				flixel.system.scaleModes.FullWidthScaleMode.restore();
+
 			switch (mode) {
 				case "STRETCHED":
 					FlxG.scaleMode = new FillScaleMode();
 				case "ZOOMED":
-					FlxG.scaleMode = new FullWidthScaleMode();
+					FlxG.scaleMode = new flixel.system.scaleModes.FullWidthScaleMode();
 				default:
 					mode = "NORMAL";
 					FlxG.scaleMode = new RatioScaleMode();
 			}
 			appliedMode = mode;
 		} catch (e:Dynamic) {}
-	}
-}
-
-/**
- * Normal look, no black bars: the game fills the whole width of the screen (like a wider stage) and the height is only
- * enlarged half of what a full zoom would need, so almost nothing is cut off and the picture is barely stretched.
- */
-class FullWidthScaleMode extends flixel.system.scaleModes.BaseScaleMode {
-	override function updateGameSize(Width:Int, Height:Int):Void {
-		var fitY:Float = Height / FlxG.height;
-		var cover:Float = Math.max(fitY, Width / FlxG.width);
-		gameSize.x = Width;
-		gameSize.y = Math.ceil(FlxG.height * (fitY + (cover - fitY) * 0.5));
 	}
 }
 #end
