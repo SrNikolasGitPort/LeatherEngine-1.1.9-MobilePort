@@ -10,7 +10,7 @@ import polymod.fs.PolymodFileSystem.PolymodFileSystemParams;
  *
  * Windows doesn't care about uppercase and lowercase in file names, but Android does: a mod that asks for `images/Freeplay/bg` while the file
  * is called `images/freeplay/BG.png` works on a PC and shows nothing on a phone. This works like the normal file system, and only when a file is
- * not found with the exact name it looks for it again ignoring the case.
+ * not found with the exact name it looks for it again ignoring the case (and the `#U2606` of zip tools, see `normalize`).
  */
 class CaseInsensitiveFileSystem extends SysFileSystem {
 	/** Folders already read: lowercase name of each entry -> the real name. */
@@ -91,7 +91,7 @@ class CaseInsensitiveFileSystem extends SysFileSystem {
 			}
 
 			var entries:Null<Map<String, String>> = list(current == "" ? "." : current);
-			var match:Null<String> = entries?.get(part.toLowerCase());
+			var match:Null<String> = entries?.get(normalize(part));
 			if (match == null)
 				return null;
 
@@ -99,6 +99,18 @@ class CaseInsensitiveFileSystem extends SysFileSystem {
 		}
 
 		return current == "" ? null : current;
+	}
+
+	static final MANGLED:EReg = ~/#U([0-9A-Fa-f]{4,6})/g;
+
+	/**
+	 * The name used to compare file names: lowercase, and with the characters that some zip tools turn into `#U2606` written as the real
+	 * character (a file called `CURE ☆.png` on the PC is `CURE #U2606.png` on a phone after it was extracted from a zip).
+	 */
+	static function normalize(name:String):String {
+		if (name.indexOf("#U") >= 0)
+			name = MANGLED.map(name, e -> String.fromCharCode(Std.parseInt("0x" + e.matched(1))));
+		return name.toLowerCase();
 	}
 
 	static function list(directory:String):Null<Map<String, String>> {
@@ -109,7 +121,7 @@ class CaseInsensitiveFileSystem extends SysFileSystem {
 		var entries:Map<String, String> = [];
 		try {
 			for (name in sys.FileSystem.readDirectory(directory)) {
-				var key:String = name.toLowerCase();
+				var key:String = normalize(name);
 				if (!entries.exists(key))
 					entries.set(key, name);
 			}

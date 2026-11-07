@@ -47,6 +47,11 @@ class ScriptCFFI {
 class ScriptSprite extends flixel.FlxSprite {
 	override public function loadGraphic(Graphic:flixel.system.FlxAssets.FlxGraphicAsset, Animated:Bool = false, Width:Int = 0, Height:Int = 0, Unique:Bool = false,
 			?Key:String):flixel.FlxSprite {
+		// an image that isn't there (wrong name in a list) would stop the whole script on a phone: draw nothing instead
+		if (Std.isOfType(Graphic, String) && !openfl.utils.Assets.exists(cast Graphic)) {
+			trace('Image not found: ' + Graphic, ERROR);
+			return makeGraphic(1, 1, 0x00000000);
+		}
 		if (Std.isOfType(Graphic, String) && !Animated && !Unique && utilities.Options.getData("vramSprites") == true) {
 			try {
 				Graphic = Paths.gpuFile(cast Graphic);
