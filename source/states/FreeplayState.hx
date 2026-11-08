@@ -118,6 +118,17 @@ class FreeplayState extends MusicBeatState {
 		var path:String = #if MODDING_ALLOWED modding.ModFiles.fix('mods/${Options.getData("curMod")}/data/freeplay.json'); #else 'assets/data/freeplay.json'; #end
 		if (FileSystem.exists(path)) {
 			songs = cast Json.parse(File.getContent(path)).songs;
+			#if mobile
+			// mods made for older versions of the engine read `songName`, `songCharacter` and `weekNum` of the songs (`songs[curSelected].songName`)
+			for (song in songs) {
+				if (!Reflect.hasField(song, "songName"))
+					Reflect.setField(song, "songName", song.name);
+				if (!Reflect.hasField(song, "songCharacter"))
+					Reflect.setField(song, "songCharacter", song.icon);
+				if (!Reflect.hasField(song, "weekNum"))
+					Reflect.setField(song, "weekNum", song.week);
+			}
+			#end
 		}
 
 		if (curSelected > songs.length)
