@@ -185,6 +185,11 @@ class HScript extends Script {
 			var classes = class_name.split(".");
 
 			#if mobile
+			// scripts that import FlxSprite get the sprite that keeps big images out of the RAM (see ScriptSprite)
+			if (class_name == "flixel.FlxSprite") {
+				set("FlxSprite", modding.ScriptStubs.ScriptSprite);
+				return;
+			}
 			// (the ndll files of the mods can't be loaded on Android)
 			if (class_name == "lime.system.CFFI") {
 				set("CFFI", modding.ScriptStubs.ScriptCFFI);

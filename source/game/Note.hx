@@ -319,9 +319,8 @@ class Note extends #if MODCHARTING_TOOLS modcharting.FlxSprite3D #else flixel.ad
 		var noteYOffset:Float = Std.parseFloat(PlayState.instance.arrow_Configs.get(arrow_Type)[0]) * lmaoStuff * sizeFix;
 		var downSign:Float = Options.getData("downscroll") ? -1 : 1;
 		#if mobile
-		// the V-Slice layout turns the downscroll on by itself, the offset of the note (`Bomb Death.txt`...) was made for the scroll the player chose
-		if (PlayState.vSliceForcedDownscroll)
-			downSign = 1;
+		// the offset of the note (`Death.txt`, `Bomb Death.txt`...) is the same in downscroll and upscroll: the note sits where it does in upscroll
+		downSign = 1;
 		#end
 		offset.y += noteYOffset * downSign;
 

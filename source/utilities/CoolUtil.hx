@@ -321,31 +321,6 @@ class CoolUtil {
 		'default' => '\033[0m' // grey apparently
 	];
 
-	#if mobile
-	static var logFile:sys.io.FileOutput = null;
-	static var logFileFailed:Bool = false;
-
-	/**
-	 * On a phone there's no console: everything the game prints (script errors, missing files...) is also written to `logs/latest.txt`
-	 * inside the engine folder, from the last time the game was opened. Send it when something doesn't work.
-	 */
-	static function writeLogFile(line:String):Void {
-		if (logFileFailed)
-			return;
-		try {
-			if (logFile == null) {
-				if (!FileSystem.exists("./logs/"))
-					FileSystem.createDirectory("./logs/");
-				logFile = File.write("./logs/latest.txt", false);
-			}
-			logFile.writeString(line + "\n");
-			logFile.flush();
-		} catch (e:Dynamic) {
-			logFileFailed = true;
-		}
-	}
-	#end
-
 	/**
 		Used to replace haxe.Log.trace
 
@@ -375,9 +350,6 @@ class CoolUtil {
 	**/
 	public static function print(message:String, ?type:PrintType = LOG, ?infos:PosInfos):Void {
 		untyped __cpp__("std::cout << {0}", '${formatOutput('${messageFromPrintType(type)} $message', infos)}\n');
-		#if mobile
-		writeLogFile('${formatOutput('${messageFromPrintType(type)} $message', infos)}');
-		#end
 		final formattedMessage:String = formatOutput(message, infos);
 		EntryPoint.runInMainThread(() -> {
 			switch (type) {
