@@ -122,15 +122,10 @@ jobs:
           haxelib run lime config JAVA_HOME "$JAVA_HOME"
           haxelib run lime config ANDROID_SETUP true
 
-      # Release APKs have to be signed to be installable. This is a throw-away key made for the build,
-      # so a fresh APK can't be installed over one built by another run (uninstall the old one first).
-      # To keep updating in place, store your own keystore in the repository secrets and use it here instead.
-      - name: Create a signing key
-        run: |
-          keytool -genkeypair -v -keystore "$RUNNER_TEMP/leather.keystore" -alias leather \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass leatherengine -keypass leatherengine \
-            -dname "CN=Leather Engine, O=Leather Engine, C=US"
+      # Release APKs have to be signed to be installable. The key is always the same (signing/leather.keystore), so a new APK
+      # installs over the old one without uninstalling it.
+      - name: Signing key
+        run: cp signing/leather.keystore "$RUNNER_TEMP/leather.keystore"
 
       - name: Build APK
         run: |
@@ -166,44 +161,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.release_tag }}
         run: |
-          apk="LeatherEngine-Android-$TAG.apk"
+          apk="LeatherEngine-Android.apk"
           cp "$(find export -name '*.apk' | head -1)" "$apk"
 
-          cat > release_notes.md <<'NOTES'
-          Leather Engine 1.1.9 para Android (arm64 e armv7 / 32 bits, Android 7.0 ou mais novo). Versão Beta: pode ter bugs.
-
-          ## Resumo da Update
-
-          **Controles de toque**
-          - Menu principal por toque (só o botão MODS); no TAB (Mods) os controles completos aparecem.
-          - Barra de teclas nos editores mostrando o que cada botão faz, e teclado do celular ao tocar nas caixas de texto.
-          - Hitbox: opções de área (tela toda ou dentro da imagem), estilo CLASSIC ou V-SLICE (4K), esconder dica, deslizar entre as lanes e teclas extras (6K a 21K) funcionando.
-          - Freeplay (X ouvir, Y resetar score, C velocidade), Story Mode, tela de resultado (toque = Enter) e game over só com A/B.
-          - Botão voltar do Android funciona como ESC.
-
-          **Jogo**
-          - Camera Tracks Direction corrigido (oponente e player).
-          - Nota Death com tamanho original e offset alinhado (jogo e chart editor).
-          - Menu de Opções abre mais rápido (páginas carregadas sob demanda).
-
-          **Scripts, shaders e mods**
-          - Lua ativado no Android.
-          - Shaders de PC (GLSL 130/330, precisão, round/trunc/sinh/cosh/tanh) e shaders GLSL ES adaptados; shader que não compila mostra a imagem normal em vez de tela preta.
-          - Erros em scripts Lua e eventos vão para o log em vez de fechar o jogo.
-
-          **Crashes**
-          - Tela de erro com botão COPIAR LOG; os logs ficam em `.Leather1.1.9/crash/`.
-
-          ## Como instalar
-          1. Baixe o `.apk` abaixo e instale (permita "instalar apps desconhecidos" se o Android pedir).
-          2. Na primeira abertura, permita o acesso aos arquivos. A engine cria a pasta `.Leather1.1.9` e copia os arquivos do jogo (cerca de 340 MB, só demora na primeira vez).
-          3. Coloque seus mods em `.Leather1.1.9/mods/`.
-
-          ## Limitações
-          - Vídeos de cutscene e Discord RPC não estão disponíveis no Android.
-          - A chave de assinatura é gerada a cada build: para instalar uma versão nova, desinstale a anterior antes.
-          NOTES
-          sed -i 's/^          //' release_notes.md
 
           # the same tag can be used again: the old release of that tag is replaced by the new build
           gh release delete "$TAG" --cleanup-tag --yes || true
@@ -211,5 +171,5 @@ jobs:
           gh release create "$TAG" "$apk" \
             --target "$GITHUB_SHA" \
             --title "Leather Engine 1.1.9 Beta Mobile Port" \
-            --notes-file release_notes.md \
+            --notes "" \
             --prerelease
