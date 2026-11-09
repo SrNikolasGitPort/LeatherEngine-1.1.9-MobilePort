@@ -58,9 +58,16 @@ class FreeplayPorts {
 		var lines:Array<String> = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
 		if (lines.length == 0) {
 			// not found through the asset library: look for it straight in the folder of the mod
-			var path:String = modding.ModFiles.fix('mods/${utilities.Options.getData("curMod")}/data/freeplaySonglist.txt');
-			if (sys.FileSystem.exists(path))
-				lines = [for (l in sys.io.File.getContent(path).split("\n")) l.trim()].filter(l -> l != "");
+			var mod:String = utilities.Options.getData("curMod");
+			for (place in ['data/freeplaySonglist.txt', 'freeplaySonglist.txt', 'data/freeplaysonglist.txt', 'data/freeplay songlist.txt']) {
+				var path:String = modding.ModFiles.fix('mods/$mod/$place');
+				if (sys.FileSystem.exists(path)) {
+					lines = [for (l in sys.io.File.getContent(path).split("\n")) l.trim()].filter(l -> l != "");
+					break;
+				}
+			}
+			if (lines.length == 0)
+				trace('Freeplay ports: there is no freeplaySonglist.txt in the data folder of the mod "$mod".', WARNING);
 		}
 
 		for (line in lines) {

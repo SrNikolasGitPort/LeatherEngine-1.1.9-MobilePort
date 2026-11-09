@@ -30,7 +30,7 @@ class OptionsMenu extends MusicBeatState {
 			new PageOption("Mod Options", "Mod Options", "Change options for specific mods."),
 			#end
 			#if mobile
-			new PageOption("Mobile Options", "Mobile Options", "Touch controls, buttons, screen mode\nand performance for weak phones."),
+			new PageOption("Mobile Options", "Mobile Options", "Touch controls, buttons and screen mode."),
 			#end
 			new PageOption("Developer Options", "Developer Options", "Change options for developing mods.")
 		],
@@ -40,7 +40,6 @@ class OptionsMenu extends MusicBeatState {
 			new PageOption("Touch Controls", "Touch Controls", "The colored lanes you tap during songs."),
 			new PageOption("Buttons", "Mobile Buttons", "The pause button and the Chart Editor button."),
 			new PageOption("Screen", "Mobile Screen", "How the game fills the screen."),
-			new PageOption("Performance", "Mobile Performance", "Make the game lighter on weak phones."),
 		],
 		"Touch Controls" => () -> [
 			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
@@ -62,14 +61,6 @@ class OptionsMenu extends MusicBeatState {
 			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
 			new StringSaveOption("Screen", ["NORMAL", "STRETCHED", "FULL SCREEN"], "mobileScreenMode",
 				"NORMAL: original proportions, with black bars if the screen is wider.\nSTRETCHED: the picture is stretched over the whole screen.\nFULL SCREEN: like FNF Mobile, same proportions with no black bars (the stage gets wider)."),
-		],
-		"Mobile Performance" => () -> [
-			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
-			new BoolOption("VRAM Sprites", "vramSprites", "Keeps pictures only in the graphics memory.\nUses less RAM, which helps weak phones."),
-			new BoolOption("Optimized Characters", "optimizedChars", "Uses lighter versions of characters when a mod has them."),
-			new BoolOption("Shaders", "shaders", "Turns shader effects on or off."),
-			new StringSaveOption("Shader Precision", ["HIGH", "LOW"], "shaderPrecision",
-				"HIGH: shaders look exactly like on PC.\nLOW: shaders use less precision, which runs smoother on weak phones (some effects can look slightly different)."),
 		],
 		#end
 		"Gameplay" => () -> [

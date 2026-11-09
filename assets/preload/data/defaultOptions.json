@@ -13,10 +13,6 @@
 			"value": "NORMAL"
 		},
 		{
-			"option": "shaderPrecision",
-			"value": "HIGH"
-		},
-		{
 			"option": "chartEditorButton",
 			"value": false
 		},

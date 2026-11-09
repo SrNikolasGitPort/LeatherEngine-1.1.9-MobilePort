@@ -50,6 +50,12 @@ class CustomShader extends FlxRuntimeShader {
 		try {
 			var gl = @:privateAccess __context.gl;
 			if (!failed && gl.getProgramParameter(program, gl.LINK_STATUS) == 0) {
+				// second try: numbers written without a dot (`2 * x`) that ES refuses, written as floats
+				var again = super.__createGLProgram(vertexSource, ShaderSanitizer.floatLiterals(fragmentSource));
+				if (gl.getProgramParameter(again, gl.LINK_STATUS) != 0) {
+					trace("A shader needed a second, more careful fix to work on this device.", WARNING);
+					return again;
+				}
 				failed = true;
 				trace("A shader couldn't be used by this device, it was replaced by one that doesn't change the image.", ERROR);
 				return super.__createGLProgram(FALLBACK_VERTEX, FALLBACK_FRAGMENT);
@@ -64,10 +70,6 @@ class CustomShader extends FlxRuntimeShader {
 		var defaults:Array<ShaderSanitizer.UniformDefault> = [];
 		fragmentSource = ShaderSanitizer.fragment(fragmentSource, defaults);
 		vertexSource = ShaderSanitizer.vertex(vertexSource);
-
-		// optional, for weak phones: calculate with less precision (faster). HIGH (default) keeps the PC look
-		if (fragmentSource != null && utilities.Options.getData("shaderPrecision") == "LOW")
-			fragmentSource = StringTools.replace(fragmentSource, "#pragma header", "#pragma header\nprecision mediump float;");
 		#end
 
 		try {

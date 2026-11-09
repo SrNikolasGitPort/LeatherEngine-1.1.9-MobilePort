@@ -112,7 +112,6 @@ class Options {
 		setData(false, "showTracedLines");
 		setData(false, "checkForUpdates");
 		setData("NORMAL", "mobileScreenMode"); // NORMAL / STRETCHED / FULL SCREEN
-		setData("HIGH", "shaderPrecision"); // HIGH / LOW
 		setData(true, "mobileTunedV3");
 	}
 	#end

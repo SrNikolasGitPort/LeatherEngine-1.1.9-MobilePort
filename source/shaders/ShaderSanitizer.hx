@@ -37,6 +37,23 @@ class ShaderSanitizer {
 
 	static final TYPES:String = "float|int|bool|vec[234]|ivec[234]|bvec[234]|mat[234]";
 
+	/**
+	 * Second try for a shader the phone refused: ES doesn't convert `int` to `float`, so `2 * x` or `mix(a, b, 1)` don't compile.
+	 * Every whole number in an expression is written as a float. Lines that need real integers (loops, indexes, `int` variables,
+	 * `#` directives, uniforms...) are left alone.
+	 */
+	public static function floatLiterals(source:Null<String>):Null<String> {
+		if (source == null)
+			return null;
+
+		var skip:EReg = ~/(^\s*#)|\b(int|ivec[234]|for|while|switch|case|uniform|attribute|varying|precision|layout|sampler2D|return)\b|\[|\d[eE][-+]?\d/;
+		var number:EReg = ~/(^|[^\w.])(\d+)(?![\w.])/g;
+		return [
+			for (line in source.split("\n"))
+				skip.match(line) ? line : number.map(line, e -> e.matched(1) + e.matched(2) + ".0")
+		].join("\n");
+	}
+
 	public static function fragment(source:Null<String>, ?defaults:Array<UniformDefault>):Null<String> {
 		if (source == null)
 			return null;
