@@ -59,7 +59,7 @@ class FreeplayPorts {
 		if (lines.length == 0) {
 			// not found through the asset library: look for it straight in the folder of the mod
 			var mod:String = utilities.Options.getData("curMod");
-			for (place in ['data/freeplaySonglist.txt', 'freeplaySonglist.txt', 'data/freeplaysonglist.txt', 'data/freeplay songlist.txt']) {
+			for (place in ['data/freeplaySonglist.txt', '_append/data/freeplaySonglist.txt', 'freeplaySonglist.txt', 'data/freeplaysonglist.txt', 'data/freeplay songlist.txt']) {
 				var path:String = modding.ModFiles.fix('mods/$mod/$place');
 				if (sys.FileSystem.exists(path)) {
 					lines = [for (l in sys.io.File.getContent(path).split("\n")) l.trim()].filter(l -> l != "");
