@@ -55,7 +55,15 @@ class FreeplayPorts {
 	function new() {}
 
 	function read():Void {
-		for (line in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'))) {
+		var lines:Array<String> = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
+		if (lines.length == 0) {
+			// not found through the asset library: look for it straight in the folder of the mod
+			var path:String = modding.ModFiles.fix('mods/${utilities.Options.getData("curMod")}/data/freeplaySonglist.txt');
+			if (sys.FileSystem.exists(path))
+				lines = [for (l in sys.io.File.getContent(path).split("\n")) l.trim()].filter(l -> l != "");
+		}
+
+		for (line in lines) {
 			var fields:Array<String> = line.split(":");
 			if (fields.length > 5 && fields[5].trim() != "")
 				portOfSong.set(fields[0].trim().toLowerCase(), fields[5].trim());

@@ -30,25 +30,44 @@ class OptionsMenu extends MusicBeatState {
 			new PageOption("Mod Options", "Mod Options", "Change options for specific mods."),
 			#end
 			#if mobile
-			new PageOption("Mobile Options", "Mobile Options", "Change the touch controls, the fullscreen mode\nand where the engine folder is."),
+			new PageOption("Mobile Options", "Mobile Options", "Touch controls, buttons, screen mode\nand performance for weak phones."),
 			#end
 			new PageOption("Developer Options", "Developer Options", "Change options for developing mods.")
 		],
 		#if mobile
 		"Mobile Options" => () -> [
 			new PageOption("Back", "Categories", "Go back to the main menu."),
+			new PageOption("Touch Controls", "Touch Controls", "The colored lanes you tap during songs."),
+			new PageOption("Buttons", "Mobile Buttons", "The pause button and the Chart Editor button."),
+			new PageOption("Screen", "Mobile Screen", "How the game fills the screen."),
+			new PageOption("Performance", "Mobile Performance", "Make the game lighter on weak phones."),
+		],
+		"Touch Controls" => () -> [
+			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
 			new BoolOption("Hitbox Visible", "hitboxVisible", "When not toggled, the colored lanes you tap\nduring songs are hidden but still work."),
 			new StepperSaveOption("Hitbox Opacity", 5, 80, "hitboxOpacity", 5, "How visible the colored lanes are.\nUse left and right to change it. (in %)"),
 			new BoolOption("Hide Hitbox Hint", "hideHitboxHint",
 				"The colored lanes are invisible, but the lane you touch lights up.\n(Hitbox Visible OFF hides them completely.)"),
-			new BoolOption("Hide Pause Button", "hidePauseButton", "Hides the pause button during songs.\nUse the Back button of your phone to pause."),
-			new BoolOption("Chart Editor Button", "chartEditorButton", "Shows a \"7\" button during songs that opens the Chart Editor.\nIt sits below the pause button (or where it was, if hidden)."),
 			new StringSaveOption("Hitbox Style", ["CLASSIC", "V-SLICE"], "hitboxStyle",
 				"CLASSIC: flat colored columns.\nV-SLICE (experimental, 4K only): columns that fade in towards the strum line."),
 			new StringSaveOption("Hitbox Area", ["SCREEN", "GAME"], "hitboxArea",
 				"SCREEN: the lanes cover the whole screen.\nGAME: the lanes stay inside the game image, after the black bars."),
+		],
+		"Mobile Buttons" => () -> [
+			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
+			new BoolOption("Hide Pause Button", "hidePauseButton", "Hides the pause button during songs.\nUse the Back button of your phone to pause."),
+			new BoolOption("Chart Editor Button", "chartEditorButton", "Shows a \"7\" button during songs that opens the Chart Editor.\nIt sits below the pause button (or where it was, if hidden)."),
+		],
+		"Mobile Screen" => () -> [
+			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
 			new StringSaveOption("Screen", ["NORMAL", "STRETCHED", "FULL SCREEN"], "mobileScreenMode",
 				"NORMAL: original proportions, with black bars if the screen is wider.\nSTRETCHED: the picture is stretched over the whole screen.\nFULL SCREEN: like FNF Mobile, same proportions with no black bars (the stage gets wider)."),
+		],
+		"Mobile Performance" => () -> [
+			new PageOption("Back", "Mobile Options", "Go back to Mobile Options."),
+			new BoolOption("VRAM Sprites", "vramSprites", "Keeps pictures only in the graphics memory.\nUses less RAM, which helps weak phones."),
+			new BoolOption("Optimized Characters", "optimizedChars", "Uses lighter versions of characters when a mod has them."),
+			new BoolOption("Shaders", "shaders", "Turns shader effects on or off."),
 			new StringSaveOption("Shader Precision", ["HIGH", "LOW"], "shaderPrecision",
 				"HIGH: shaders look exactly like on PC.\nLOW: shaders use less precision, which runs smoother on weak phones (some effects can look slightly different)."),
 		],
