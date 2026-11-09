@@ -31,7 +31,7 @@
 	<define name="LUA_ALLOWED" if="desktop || android" /> <!--  Allows support for Lua scripting -->
 	<define name="HSCRIPT_ALLOWED" /> <!--  Allows support for Haxe scripting (HScript) -->
 
-	<define name="CHECK_FOR_UPDATES" /> <!-- Allows the game to connect to GitHub to check for an
+	<define name="CHECK_FOR_UPDATES" unless="mobile" /> <!-- Allows the game to connect to GitHub to check for an
 	update -->
 
 	<!-- 
