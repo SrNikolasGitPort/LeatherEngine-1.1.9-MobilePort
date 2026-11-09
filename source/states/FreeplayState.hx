@@ -70,6 +70,10 @@ class FreeplayState extends MusicBeatState {
 	// thx psych engine devs
 	public var colorTween:FlxTween;
 
+	#if mobile
+	var ports:mobile.FreeplayPorts;
+	#end
+
 	#if (target.threaded)
 	public var loading_songs:Thread;
 	public var stop_loading_songs:Bool = false;
@@ -247,6 +251,10 @@ class FreeplayState extends MusicBeatState {
 		add(infoText);
 
 		super.create();
+		#if mobile
+		ports = mobile.FreeplayPorts.create(this);
+		#end
+
 		call("createPost");
 	}
 
@@ -261,6 +269,9 @@ class FreeplayState extends MusicBeatState {
 		}*/
 	override function update(elapsed:Float) {
 		call("update", [elapsed]);
+		#if mobile
+		ports?.update(elapsed);
+		#end
 		#if MODDING_ALLOWED
 		if (FlxG.keys.justPressed.TAB) {
 			openSubState(new modding.SwitchModSubstate());
@@ -657,6 +668,10 @@ class FreeplayState extends MusicBeatState {
 			}
 		}
 		canEnterSong = (curSong?.menuConfig?.canBeEntered) ?? true;
+		#if mobile
+		ports?.select(songs[curSelected]?.name);
+		#end
+
 		call("changeSelectionPost", [change]);
 	}
 
