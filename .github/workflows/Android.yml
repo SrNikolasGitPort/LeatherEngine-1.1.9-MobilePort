@@ -154,6 +154,7 @@ jobs:
           name: LeatherEngine-Android
           path: export/**/outputs/apk/**/*.apk
           if-no-files-found: error
+          retention-days: 1 # the release keeps the APK, old copies here filled the storage of the account
 
       - name: Publish the release
         if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
