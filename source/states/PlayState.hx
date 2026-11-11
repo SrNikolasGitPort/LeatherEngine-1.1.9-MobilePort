@@ -1856,6 +1856,9 @@ class PlayState extends MusicBeatState {
 	}
 
 	function resyncVocals():Void {
+		#if mobile
+		lastResyncMs = Std.int(FlxG.game.ticks);
+		#end
 		FlxG.sound.music.pitch = songMultiplier;
 
 		if (vocals.active && vocals.playing)
@@ -3557,7 +3560,19 @@ class PlayState extends MusicBeatState {
 	override function stepHit() {
 		super.stepHit();
 
+		#if mobile
+		// the phone's audio position moves in big steps and a slow frame is enough to pass 20 ms, and every resync pauses / seeks / plays the
+		// audio, which is a hitch on its own: that made the lag keep itself going on busy parts. A wider margin and a pause between resyncs stop that.
+		var gamerValue = 45 * songMultiplier;
+		var nowMs:Int = Std.int(FlxG.game.ticks);
+		if (nowMs - lastResyncMs < 500) {
+			set("curStep", curStep);
+			call("stepHit", [curStep]);
+			return;
+		}
+		#else
 		var gamerValue = 20 * songMultiplier;
+		#end
 
 		if (FlxG.sound.music.time > Conductor.songPosition + gamerValue
 			|| FlxG.sound.music.time < Conductor.songPosition - gamerValue
@@ -3568,6 +3583,10 @@ class PlayState extends MusicBeatState {
 		set("curStep", curStep);
 		call("stepHit", [curStep]);
 	}
+
+	#if mobile
+	var lastResyncMs:Int = -10000;
+	#end
 
 	function danceCharacter(char:Character) {
 		if (!char.isCharacterGroup) {

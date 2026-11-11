@@ -576,13 +576,17 @@ class FreeplayState extends MusicBeatState {
 
 		PlayState.loadChartEvents = true;
 		PlayState.chartingMode = false;
-		destroyFreeplayVocals();
 		#if mobile
 		// loading the song freezes the screen: the buttons are hidden first and given a few frames to really disappear, then the song loads
+		// (the music stays alive until then, the menu keeps updating for those frames)
 		mobile.MobileInput.hideUntilNextState();
 		canEnterSong = false;
-		new FlxTimer().start(0.12, _ -> FlxG.switchState(() -> new PlayState()));
+		new FlxTimer().start(0.12, _ -> {
+			destroyFreeplayVocals();
+			FlxG.switchState(() -> new PlayState());
+		});
 		#else
+		destroyFreeplayVocals();
 		FlxG.switchState(() -> new PlayState());
 		#end
 	}
