@@ -31,6 +31,9 @@ class FreeplayPorts {
 
 	var target:String = null;
 
+	/** True while the engine shows the ports, the picture the script of the mod would load for them isn't needed (see `ScriptSprite`). */
+	public static var active:Bool = false;
+
 	/** Where the pictures go in the state: right over the background. */
 	var insertIndex:Int = 0;
 
@@ -45,7 +48,8 @@ class FreeplayPorts {
 			var ports:FreeplayPorts = new FreeplayPorts();
 			ports.state = state;
 			ports.read();
-			return ports.portOfSong.keys().hasNext() ? ports : null;
+			active = ports.portOfSong.keys().hasNext();
+			return active ? ports : null;
 		} catch (e:Dynamic) {
 			trace('Freeplay ports: $e', ERROR);
 			return null;
@@ -119,6 +123,10 @@ class FreeplayPorts {
 		} catch (e:Dynamic) {
 			trace('Freeplay port "$port": $e', ERROR);
 		}
+	}
+
+	public static function stop():Void {
+		active = false;
 	}
 
 	public function update(elapsed:Float):Void {

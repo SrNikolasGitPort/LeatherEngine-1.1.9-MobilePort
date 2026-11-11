@@ -52,6 +52,9 @@ class ScriptSprite extends flixel.FlxSprite {
 			trace('Image not found: ' + Graphic, ERROR);
 			return makeGraphic(1, 1, 0x00000000);
 		}
+		// the engine shows the ports of the freeplay itself: the copy the script of the mod would draw over it (a different size) isn't loaded
+		if (Std.isOfType(Graphic, String) && mobile.FreeplayPorts.active && (cast Graphic : String).indexOf("freeplay/ports/") >= 0)
+			return makeGraphic(1, 1, 0x00000000);
 		if (Std.isOfType(Graphic, String) && !Animated && !Unique && utilities.Options.getData("vramSprites") == true) {
 			try {
 				Graphic = Paths.gpuFile(cast Graphic);

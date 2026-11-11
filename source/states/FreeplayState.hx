@@ -72,6 +72,7 @@ class FreeplayState extends MusicBeatState {
 
 	#if mobile
 	var ports:mobile.FreeplayPorts;
+	var fastScroll:Float = 0;
 	#end
 
 	#if (target.threaded)
@@ -267,6 +268,13 @@ class FreeplayState extends MusicBeatState {
 			songs.push(new FreeplaySong(songName, weekNum, songCharacter));
 			call("addSongPost", [songName, weekNum, songCharacter]);
 		}*/
+	#if mobile
+	override function destroy() {
+		mobile.FreeplayPorts.stop();
+		super.destroy();
+	}
+	#end
+
 	override function update(elapsed:Float) {
 		call("update", [elapsed]);
 		#if mobile
@@ -342,10 +350,28 @@ class FreeplayState extends MusicBeatState {
 				else if (-1 * (Math.floor(FlxG.mouse.wheel) / 10) != 0 && shift)
 					curSpeed += -1 * (Math.floor(FlxG.mouse.wheel) / 10);
 
+				#if mobile
+				// holding Z (button of the touch controls), up / down keep scrolling fast
+				var fast:Bool = FlxG.keys.pressed.Z && (controls.UP || controls.DOWN);
+				if (fast) {
+					fastScroll -= elapsed;
+					if (fastScroll <= 0) {
+						changeSelection(controls.UP ? -1 : 1);
+						fastScroll = 0.07;
+					}
+				} else {
+					fastScroll = 0;
+					if (upP)
+						changeSelection(-1);
+					if (downP)
+						changeSelection(1);
+				}
+				#else
 				if (upP)
 					changeSelection(-1);
 				if (downP)
 					changeSelection(1);
+				#end
 			}
 
 			if (leftP && !shift)
@@ -552,10 +578,13 @@ class FreeplayState extends MusicBeatState {
 		PlayState.chartingMode = false;
 		destroyFreeplayVocals();
 		#if mobile
-		// the buttons would stay on screen until the song is loaded
+		// loading the song freezes the screen: the buttons are hidden first and given a few frames to really disappear, then the song loads
 		mobile.MobileInput.hideUntilNextState();
-		#end
+		canEnterSong = false;
+		new FlxTimer().start(0.12, _ -> FlxG.switchState(() -> new PlayState()));
+		#else
 		FlxG.switchState(() -> new PlayState());
+		#end
 	}
 
 	override function closeSubState() {

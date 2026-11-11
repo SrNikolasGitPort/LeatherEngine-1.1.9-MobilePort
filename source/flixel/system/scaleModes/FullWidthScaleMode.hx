@@ -33,7 +33,18 @@ class FullWidthScaleMode extends BaseScaleMode {
 			var oldWidth:Float = camera.width;
 			camera.setSize(FlxG.width, FlxG.height);
 			camera.scroll.x += 0.5 * (oldWidth - FlxG.width);
+			refreshFilters(camera);
 		}
+	}
+
+	/**
+	 * The shaders put on a camera (`ShaderFilter`) keep the size of the picture they were made for: giving them to the camera again
+	 * makes them cover the new, wider picture.
+	 */
+	static function refreshFilters(camera:flixel.FlxCamera):Void {
+		var filters = camera.filters;
+		if (filters != null && filters.length > 0)
+			camera.filters = filters.copy();
 	}
 
 	/**
@@ -46,6 +57,7 @@ class FullWidthScaleMode extends BaseScaleMode {
 			var oldWidth:Float = camera.width;
 			camera.setSize(FlxG.initialWidth, FlxG.initialHeight);
 			camera.scroll.x += 0.5 * (oldWidth - FlxG.initialWidth);
+			refreshFilters(camera);
 		}
 		FlxG.width = FlxG.initialWidth;
 		FlxG.height = FlxG.initialHeight;
