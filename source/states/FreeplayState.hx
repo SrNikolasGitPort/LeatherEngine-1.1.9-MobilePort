@@ -289,7 +289,7 @@ class FreeplayState extends MusicBeatState {
 
 		super.update(elapsed);
 
-		if (FlxG.sound.music.playing)
+		if (FlxG.sound.music != null && FlxG.sound.music.playing)
 			Conductor.songPosition = FlxG.sound.music.time;
 
 		for (i in 0...iconArray.length) {
@@ -393,7 +393,7 @@ class FreeplayState extends MusicBeatState {
 
 				if (vocals.active && vocals.playing)
 					destroyFreeplayVocals(false);
-				if (FlxG.sound.music.active && FlxG.sound.music.playing)
+				if (FlxG.sound.music != null && FlxG.sound.music.active && FlxG.sound.music.playing)
 					FlxG.sound.music.pitch = 1;
 
 				#if (target.threaded)
@@ -444,7 +444,7 @@ class FreeplayState extends MusicBeatState {
 			}
 			#end
 
-			if (FlxG.sound.music.active && FlxG.sound.music.playing && !FlxG.keys.justPressed.ENTER)
+			if (FlxG.sound.music != null && FlxG.sound.music.active && FlxG.sound.music.playing && !FlxG.keys.justPressed.ENTER)
 				FlxG.sound.music.pitch = curSpeed;
 			if (vocals != null && vocals.active && vocals.playing && !FlxG.keys.justPressed.ENTER)
 				vocals.pitch = curSpeed;
