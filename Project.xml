@@ -22,7 +22,7 @@
 	Features that rely on desktop-only native libraries are limited to desktop targets.
 	Mods (Polymod + HScript) work on every target, including Android.
 	-->
-	<define name="VIDEOS_ALLOWED" if="desktop" /> <!--  Allows support for video files -->
+	<define name="VIDEOS_ALLOWED" if="desktop || android" /> <!--  Allows support for video files -->
 	<define name="DISCORD_ALLOWED" if="desktop" /> <!--  Allows support for Discord Rich Presence -->
 	<define name="MODDING_ALLOWED" /> <!-- Allows mod loading -->
 
