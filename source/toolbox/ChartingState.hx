@@ -2172,7 +2172,7 @@ class ChartingState extends MusicBeatState {
 		var data:String = Json.stringify(json);
 
 		#if mobile
-		// there is no save dialog on a phone: the chart goes to the engine folder and to its "Save" folder
+		// there is no save dialog on a phone: the chart goes to the "Charts-Saves" folder of the engine
 		if ((data != null) && (data.length > 0)) {
 			var fileName:String = _song.song.toLowerCase();
 
@@ -2207,30 +2207,7 @@ class ChartingState extends MusicBeatState {
 
 	#if mobile
 	function saveToEngineFolders(data:String, fileName:String):Void {
-		var saved:Array<String> = [];
-
-		// the working directory is the engine folder
-		for (folder in ["./", "./Save/"]) {
-			try {
-				if (!sys.FileSystem.exists(folder))
-					sys.FileSystem.createDirectory(folder);
-				var path:String = folder + fileName + ".json";
-				sys.io.File.saveContent(path, data);
-				saved.push(haxe.io.Path.normalize(Sys.getCwd() + path));
-			} catch (e:Dynamic) {
-				trace('Could not save the chart in $folder: $e', ERROR);
-			}
-		}
-
-		var toast:FlxText = new FlxText(0, FlxG.height * 0.85, FlxG.width,
-			saved.length > 0 ? "Chart saved:\n" + saved.join("\n") : "The chart could not be saved (check the storage permission).", 14);
-		toast.alignment = CENTER;
-		toast.color = saved.length > 0 ? 0xFF9BFF9B : 0xFFFF6060;
-		toast.borderStyle = OUTLINE;
-		toast.borderColor = 0xFF000000;
-		toast.scrollFactor.set();
-		add(toast);
-		flixel.tweens.FlxTween.tween(toast, {alpha: 0}, 1, {startDelay: 4, onComplete: (_) -> toast.destroy()});
+		mobile.EditorSaves.save(this, mobile.EditorSaves.CHARTS, _song.song.toLowerCase(), fileName + ".json", data);
 	}
 	#end
 

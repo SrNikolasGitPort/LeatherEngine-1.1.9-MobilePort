@@ -1047,8 +1047,8 @@ class MobileInput extends Sprite {
 					if (FlxG.state is FreeplayState) {
 						// hold C (SHIFT) and slide left / right to change the song speed
 						addButton(Keyboard.SHIFT, "C", extraX, stageHeight - margin - bigSize, bigSize);
-						// hold Z and press up / down to scroll through the songs faster
-						addButton(Keyboard.Z, "Z", extraX - bigSize * 1.2, stageHeight - margin - bigSize, bigSize);
+						// hold Z (next to Y) and press up / down to scroll through the songs faster
+						addButton(Keyboard.Z, "Z", resetX + bigSize * 1.2, extraY, bigSize);
 						// X listens to the song, Y resets the score
 						addButton(Keyboard.SPACE, "X", extraX, extraY, bigSize);
 						addButton(getBind("kill", Keyboard.R), "Y", resetX, extraY, bigSize);

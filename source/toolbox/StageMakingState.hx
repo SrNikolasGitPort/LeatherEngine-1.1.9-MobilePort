@@ -897,6 +897,12 @@ class StageMakingState extends MusicBeatState {
 	function saveLevel() {
 		var data:String = Json.stringify(stageData, null, "\t");
 
+		#if mobile
+		if ((data != null) && (data.length > 0))
+			mobile.EditorSaves.save(this, mobile.EditorSaves.STAGES, stageName, stageName + ".json", data.trim());
+		return;
+		#end
+
 		if ((data != null) && (data.length > 0)) {
 			_file = new FileReference();
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);

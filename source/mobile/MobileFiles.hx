@@ -225,6 +225,7 @@ class MobileFiles {
 	public static function setWorkingDirectory():Void {
 		try {
 			Sys.setCwd(storageDirectory);
+			EditorSaves.createFolders();
 		} catch (e:Dynamic) {
 			error = 'Could not open the engine folder "$storageDirectory": $e';
 		}

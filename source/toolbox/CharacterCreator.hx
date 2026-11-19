@@ -1112,6 +1112,11 @@ class CharacterCreator extends MusicBeatState {
 			if (offsetsText.endsWith("\n"))
 				offsetsText = offsetsText.substr(0, offsetsText.length - 1);
 
+			#if mobile
+			mobile.EditorSaves.save(this, mobile.EditorSaves.CHARACTERS, char.curCharacter, "offsets.txt", offsetsText);
+			return;
+			#end
+
 			_file = new FileReference();
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
@@ -1143,6 +1148,11 @@ class CharacterCreator extends MusicBeatState {
 			trailDiff: char.config.trailDiff,
 			animations: char.config.animations,
 		}
+		#if mobile
+		mobile.EditorSaves.save(this, mobile.EditorSaves.CHARACTERS, char.curCharacter, "config.json", Json.stringify(config, "\t"));
+		return;
+		#end
+
 		_file = new FileReference();
 		_file.addEventListener(Event.COMPLETE, onSaveComplete);
 		_file.addEventListener(Event.CANCEL, onSaveCancel);
