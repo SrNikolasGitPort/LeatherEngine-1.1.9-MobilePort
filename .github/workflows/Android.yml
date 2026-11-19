@@ -66,7 +66,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/haxelib
-          key: haxelib-${{ hashFiles('build/install_libraries.sh') }}
+          key: haxelib-v2-${{ hashFiles('build/install_libraries.sh') }}
 
       - name: Install Haxe libraries
         if: steps.haxelib-cache.outputs.cache-hit != 'true'
@@ -75,13 +75,22 @@ jobs:
           chmod +x ./build/install_libraries.sh
           ./build/install_libraries.sh
           haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp
+          # lime has a lot of submodules and cloning them fails now and then; haxelib then leaves a broken folder that would be cached.
+          # It is tried again and the build stops here if lime is still not usable, so a broken copy is never saved.
+          for i in 1 2 3 4; do
+            git -C "$(haxelib libpath lime)" rev-parse --git-dir >/dev/null 2>&1 && break
+            echo "lime is broken, installing it again (try $i)"
+            rm -rf ~/haxelib/lime
+            haxelib --skip-dependencies git lime https://github.com/swordcubes-grave-of-shite/lime-fc-old d33313e85b1655fa48c3b4ee107173b673683eaf || true
+          done
+          git -C "$(haxelib libpath lime)" rev-parse --git-dir
 
       - name: Save the Haxe libraries
         if: steps.haxelib-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/haxelib
-          key: haxelib-${{ hashFiles('build/install_libraries.sh') }}
+          key: haxelib-v2-${{ hashFiles('build/install_libraries.sh') }}
 
       - name: Show the Haxe libraries
         run: |
